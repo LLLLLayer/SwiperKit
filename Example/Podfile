@@ -1,0 +1,13 @@
+use_frameworks!
+
+platform :ios, '9.0'
+
+target 'SwiperKit_Example' do
+  pod 'SwiperKit', :path => '../'
+
+  target 'SwiperKit_Tests' do
+    inherit! :search_paths
+
+    
+  end
+end
