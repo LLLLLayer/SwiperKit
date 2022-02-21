@@ -1,5 +1,5 @@
 //
-//  SWPViewController.h
+//  SWPEmailCollectionViewController.h
 //  SwiperKit
 //
 //  Created by LLLLLayer on 02/09/2022.
@@ -8,6 +8,6 @@
 
 @import UIKit;
 
-@interface SWPViewController : UIViewController
+@interface SWPEmailCollectionViewController : UIViewController
 
 @end
