@@ -73,7 +73,6 @@
         if ([view isKindOfClass:[UICollectionView class]]) {
             // 找到自己所属的 collectionView，并添加作为 collectionView 滑动手势的响应者
             self.collectionView = (UICollectionView *)view;
-            self.swipeController.scrollerView = self.collectionView;
             [self.collectionView.panGestureRecognizer removeTarget:self action:nil];
             [self.collectionView.panGestureRecognizer addTarget:self action:@selector(__handleCollectionPanGesture:)];
         }
@@ -181,14 +180,6 @@
 - (void)swipeController:(SWPSwipeController *)controller didDeleteSwipeableAtIndexPath:(NSIndexPath *)indexPath
 {
     [self.collectionView deleteItemsAtIndexPaths:@[indexPath]];
-}
-
-- (CGRect)swipeController:(SWPSwipeController *)controller visibleRectForScrollView:(UIScrollView *)scrollView
-{
-//    if ([self.swipeCollectionViewCelldelegate respondsToSelector:@selector(visibleRectForCollectionView:)]) {
-//        return [self.swipeCollectionViewCelldelegate visibleRectForCollectionView:self.collectionView];
-//    }
-    return CGRectNull;
 }
 
 @end

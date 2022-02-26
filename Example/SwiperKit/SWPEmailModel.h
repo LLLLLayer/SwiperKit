@@ -24,7 +24,6 @@ NS_ASSUME_NONNULL_BEGIN
                          date:(NSDate * _Nullable)date
                          read:(BOOL)read;
 
-
 - (NSString *)formattorDate;
 - (void)updateReadStatus;
 

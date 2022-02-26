@@ -16,23 +16,36 @@ typedef NS_ENUM(NSInteger, SWPSwipeActionsOrientation);
 @class SWPSwipeController;
 @protocol SWPSwipeable;
 
+/// 滑动控制器代理
 @protocol SWPSwipeControllerDelegate <NSObject>
 
+/// 是否可以进行滑动操作
 - (BOOL)swipeController:(SWPSwipeController *)controller canBeginEditingSwipeableForOrientation:(SWPSwipeActionsOrientation)orientation;
+
+/// 滑动操作
 - (NSArray<SWPSwipeAction *> *)swipeController:(SWPSwipeController *)controller editActionsForSwipeableForForOrientation:(SWPSwipeActionsOrientation)orientation;
+
+/// 滑动配置
 - (SWPSwipeOptions *)swipeController:(SWPSwipeController *)controller editActionsOptionsForSwipeableForOrientation:(SWPSwipeActionsOrientation)orientation;
+
+/// 即将滑动回调
 - (void)swipeController:(SWPSwipeController *)controller willBeginEditingSwipeableForOrientation:(SWPSwipeActionsOrientation)orientation;
+
+/// 滑动结束回调
 - (void)swipeController:(SWPSwipeController *)controller didEndEditingSwipeableForOrientation:(SWPSwipeActionsOrientation)orientation;
+
+/// 删除回调
 - (void)swipeController:(SWPSwipeController *)controller didDeleteSwipeableAtIndexPath:(NSIndexPath *)indexPath;
-- (CGRect)swipeController:(SWPSwipeController *)controller visibleRectForScrollView:(UIScrollView *)scrollView;
 
 @end
 
 /// 滑动控制器
 @interface SWPSwipeController : NSObject <UIGestureRecognizerDelegate>
 
+/// 滑动控制器代理
 @property (nonatomic,   weak, nullable) id<SWPSwipeControllerDelegate> delegate;
-@property (nonatomic,   weak, nullable) UIScrollView *scrollerView;
+
+/// 滑动手势
 @property (nonatomic, strong, readonly) UIPanGestureRecognizer *panGestureRecognizer;
 
 /// 生成实例

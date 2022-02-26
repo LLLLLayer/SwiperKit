@@ -102,6 +102,35 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		2B26BE8027CA1FF80044E4F4 /* CollectionView */ = {
+			isa = PBXGroup;
+			children = (
+				2B239D7A27B3B6AF005B1A2D /* SWPEmailCollectionViewCell.h */,
+				2B239D7B27B3B6AF005B1A2D /* SWPEmailCollectionViewCell.m */,
+				6003F5A5195388D20070C39A /* SWPEmailCollectionViewController.h */,
+				6003F5A6195388D20070C39A /* SWPEmailCollectionViewController.m */,
+			);
+			name = CollectionView;
+			sourceTree = "<group>";
+		};
+		2B26BE8127CA20190044E4F4 /* TableView */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = TableView;
+			sourceTree = "<group>";
+		};
+		2B26BE8227CA20400044E4F4 /* Model & ViewModel */ = {
+			isa = PBXGroup;
+			children = (
+				2B239D7427B38E54005B1A2D /* SWPEmailModel.h */,
+				2B239D7527B38E54005B1A2D /* SWPEmailModel.m */,
+				2B239D7727B39267005B1A2D /* SWPEmailViewControllerViewModel.h */,
+				2B239D7827B39267005B1A2D /* SWPEmailViewControllerViewModel.m */,
+			);
+			name = "Model & ViewModel";
+			sourceTree = "<group>";
+		};
 		6003F581195388D10070C39A = {
 			isa = PBXGroup;
 			children = (
@@ -139,19 +168,14 @@
 		6003F593195388D20070C39A /* Example for SwiperKit */ = {
 			isa = PBXGroup;
 			children = (
+				6003F59C195388D20070C39A /* SWPAppDelegate.h */,
+				6003F59D195388D20070C39A /* SWPAppDelegate.m */,
 				6003F5A8195388D20070C39A /* Images.xcassets */,
 				71719F9D1E33DC2100824A3D /* LaunchScreen.storyboard */,
 				6003F594195388D20070C39A /* Supporting Files */,
-				6003F59C195388D20070C39A /* SWPAppDelegate.h */,
-				6003F59D195388D20070C39A /* SWPAppDelegate.m */,
-				2B239D7A27B3B6AF005B1A2D /* SWPEmailCollectionViewCell.h */,
-				2B239D7B27B3B6AF005B1A2D /* SWPEmailCollectionViewCell.m */,
-				6003F5A5195388D20070C39A /* SWPEmailCollectionViewController.h */,
-				6003F5A6195388D20070C39A /* SWPEmailCollectionViewController.m */,
-				2B239D7427B38E54005B1A2D /* SWPEmailModel.h */,
-				2B239D7527B38E54005B1A2D /* SWPEmailModel.m */,
-				2B239D7727B39267005B1A2D /* SWPEmailViewControllerViewModel.h */,
-				2B239D7827B39267005B1A2D /* SWPEmailViewControllerViewModel.m */,
+				2B26BE8127CA20190044E4F4 /* TableView */,
+				2B26BE8027CA1FF80044E4F4 /* CollectionView */,
+				2B26BE8227CA20400044E4F4 /* Model & ViewModel */,
 			);
 			name = "Example for SwiperKit";
 			path = SwiperKit;

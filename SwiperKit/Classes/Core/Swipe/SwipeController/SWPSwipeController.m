@@ -6,9 +6,11 @@
 //
 
 #import "SWPSwipeable.h"
+#import "SWPSwipeAction.h"
 #import "SWPSwipeOptions.h"
 #import "SWPSwipeController.h"
 #import "SWPSwipeActionsView.h"
+
 #import "UIScrollView+Swipe.h"
 #import "UIPanGestureRecognizer+ElasticTranslation.h"
 
@@ -57,6 +59,118 @@
     return self;
 }
 
+#pragma mark - Action
+
+/// 滑动手势处理
+/// @param gesture 滑动手势
+- (void)handlePanGesture:(UIPanGestureRecognizer *)gesture
+{
+    // 位移速度
+    CGPoint velocity = [gesture velocityInView:self.swipeable];
+    
+    // 是否允许滑动
+    if (![self.delegate respondsToSelector:@selector(swipeController:canBeginEditingSwipeableForOrientation:)] ||
+        ![self.delegate swipeController:self canBeginEditingSwipeableForOrientation:
+          velocity.x > 0 ? SWPSwipeActionsOrientationLeft : SWPSwipeActionsOrientationRight]) {
+        return;
+    }
+    
+    switch (gesture.state) {
+        case UIGestureRecognizerStateBegan:
+        {
+            // 打断可能正在进行的动画
+            [self __stopAnimatorIfNeeded];
+            
+            // 保存当前操作视图的容器视图 center.x
+            self.originalCenter = self.swipeActionsContainerView.center.x;
+            
+            // 如果当前处于中心或以动画形式到中心，则可以添加操作视图
+            if (self.swipeable.swipeState == SWPSwipeStateCenter || self.swipeable.swipeState == SWPSwipeStateAnimatingToCenter) {
+                SWPSwipeActionsOrientation targetOrientation = velocity.x > 0 ? SWPSwipeActionsOrientationLeft : SWPSwipeActionsOrientationRight;
+                [self __showActionsViewForOrientation:targetOrientation];
+            }
+            break;
+        }
+        case UIGestureRecognizerStateChanged:
+        {
+            // 此时逻辑上 swipeState 已经在手势开始时进行了更新，若未处理完手势开始逻辑，则进行阻断
+            if (self.swipeable.swipeState == SWPSwipeStateCenter) {
+                return;
+            }
+            
+            // 位移
+            CGPoint translation = [gesture translationInView:self.swipeActionsContainerView];
+            
+            // 滑动比率 1.0，动画跟手
+            self.scrollRatio = 1.0;
+            
+            // 如果用户在滑出一侧的操作视图后，直接进行反方向的滑动，则不展示另一侧的操作视图，同时修改滑动阻尼
+            if ((translation.x + self.originalCenter - CGRectGetMidX(self.swipeable.bounds)) * self.swipeable.swipeActionsView.orientation > 0) {
+                self.swipeActionsContainerView.center = CGPointMake([gesture elasticTranslationInView:self.swipeActionsContainerView
+                                                                                            withLimit:CGSizeZero
+                                                                                   fromOriginalCenter:CGPointMake(self.originalCenter, 0)
+                                                                                        applyingRatio:gesture.defaultElasticTranslationRatio].x,
+                                                                    self.swipeActionsContainerView.center.y);
+                self.scrollRatio = self.elasticScrollRatio;
+                return;
+            }
+            
+            // Layer TODO: expansionStyle
+            self.swipeActionsContainerView.center = CGPointMake([gesture elasticTranslationInView:self.swipeActionsContainerView
+                                                                                        withLimit:CGSizeMake(self.swipeable.swipeActionsView.preferredWidth, 0.0)
+                                                                               fromOriginalCenter:CGPointMake(self.originalCenter, 0.0)
+                                                                                    applyingRatio:gesture.defaultElasticTranslationRatio].x,
+                                                                self.swipeActionsContainerView.center.y);
+            [self.swipeable.swipeActionsView updateVisibleWidth:fabs(CGRectGetMinX(self.swipeActionsContainerView.frame))];
+            if ((self.swipeActionsContainerView.center.x - self.originalCenter) / translation.x != 1.0) {
+                self.scrollRatio = self.elasticScrollRatio;
+            }
+                
+            break;
+        }
+        case UIGestureRecognizerStateEnded:
+        case UIGestureRecognizerStateCancelled:
+        case UIGestureRecognizerStateFailed:
+        {
+            // 已经在中心了
+            if (self.swipeable.swipeState == SWPSwipeStateCenter &&
+                CGRectGetMidX(self.swipeable.bounds) == self.swipeActionsContainerView.center.x)  {
+                return;
+            }
+            
+            // 更新 swipeState
+            self.swipeable.swipeState = [self __targetStateForVelocity:velocity];
+            
+            // 达到滑动目标
+            CGFloat targetOffset = [self __targetCenterWithActive:self.swipeable.swipeState != SWPSwipeStateCenter];
+            CGFloat distance = targetOffset - self.swipeActionsContainerView.center.x;
+            CGFloat normalizedVelocity = velocity.x * self.scrollRatio / distance;
+            [self  __animateToOffset:targetOffset withInitialVelocity:normalizedVelocity completion:^(BOOL complete) {
+                if (self.swipeable.swipeState == SWPSwipeStateCenter) {
+                    [self reset];
+                }
+            }];
+            
+            /// 操作视图消失回调
+            if (self.swipeable.swipeState == SWPSwipeStateCenter) {
+                if ([self.delegate respondsToSelector:@selector(swipeController:didEndEditingSwipeableForOrientation:)]) {
+                    [self.delegate swipeController:self didEndEditingSwipeableForOrientation:self.swipeable.swipeActionsView.orientation];
+                }
+            }
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+/// 点击手势处理
+/// @param gesture 点击手势
+- (void)handleTapGesture:(UITapGestureRecognizer *)gesture
+{
+    [self hideSwipeWithAnimated:YES complation:nil];
+}
+
 #pragma mark - Private Methond
 
 /// 滑动手势开始，展示操作视图
@@ -103,8 +217,6 @@
     // 移除可能存在的操作视图
      [self.swipeable.swipeActionsView removeFromSuperview];
      self.swipeable.swipeActionsView = nil;
-    
-    [self.delegate swipeController:self visibleRectForScrollView:self.scrollerView];
     
     // 新操作视图
     SWPSwipeActionsView *actionsView = [[SWPSwipeActionsView alloc] initWithOptions:options
@@ -262,120 +374,6 @@
     return _tapGestureRecognizer;
 }
 
-#pragma mark - Action
-
-/// 滑动手势处理
-/// @param gesture 滑动手势
-- (void)handlePanGesture:(UIPanGestureRecognizer *)gesture
-{
-    // 位移速度
-    CGPoint velocity = [gesture velocityInView:self.swipeable];
-    
-    // 是否允许滑动
-    if (![self.delegate respondsToSelector:@selector(swipeController:canBeginEditingSwipeableForOrientation:)] ||
-        ![self.delegate swipeController:self canBeginEditingSwipeableForOrientation:
-          velocity.x > 0 ? SWPSwipeActionsOrientationLeft : SWPSwipeActionsOrientationRight]) {
-        return;
-    }
-    
-    switch (gesture.state) {
-        case UIGestureRecognizerStateBegan:
-        {
-            
-            // 打断可能正在进行的动画
-            [self __stopAnimatorIfNeeded];
-            
-            // 保存当前操作视图的容器视图 center.x
-            self.originalCenter = self.swipeActionsContainerView.center.x;
-            
-            // 如果当前处于中心或以动画形式到中心，则可以添加操作视图
-            if (self.swipeable.swipeState == SWPSwipeStateCenter ||
-                self.swipeable.swipeState == SWPSwipeStateAnimatingToCenter) {
-                SWPSwipeActionsOrientation targetOrientation = velocity.x > 0 ? SWPSwipeActionsOrientationLeft : SWPSwipeActionsOrientationRight;
-                [self __showActionsViewForOrientation:targetOrientation];
-            }
-            break;
-        }
-        case UIGestureRecognizerStateChanged:
-        {
-            // 此时逻辑上 swipeState 已经在手势开始时进行了更新，若未处理完手势开始逻辑，则进行阻断
-            if (self.swipeable.swipeState == SWPSwipeStateCenter) {
-                return;
-            }
-            
-            // 位移
-            CGPoint translation = [gesture translationInView:self.swipeActionsContainerView];
-            
-            // 滑动比率 1.0，动画跟手
-            self.scrollRatio = 1.0;
-            
-            // 如果用户在滑出一侧的操作视图后，直接进行反方向的滑动，则不展示另一侧的操作视图，同时修改滑动阻尼
-            if ((translation.x + self.originalCenter - CGRectGetMidX(self.swipeable.bounds)) * self.swipeable.swipeActionsView.orientation > 0) {
-                self.swipeActionsContainerView.center = CGPointMake([gesture elasticTranslationInView:self.swipeActionsContainerView
-                                                                                            withLimit:CGSizeZero
-                                                                                   fromOriginalCenter:CGPointMake(self.originalCenter, 0)
-                                                                                        applyingRatio:gesture.defaultElasticTranslationRatio].x,
-                                                                    self.swipeActionsContainerView.center.y);
-                self.scrollRatio = self.elasticScrollRatio;
-                return;
-            }
-            
-            // Layer TODO: expansionStyle
-            self.swipeActionsContainerView.center = CGPointMake([gesture elasticTranslationInView:self.swipeActionsContainerView
-                                                                                        withLimit:CGSizeMake(self.swipeable.swipeActionsView.preferredWidth, 0.0)
-                                                                               fromOriginalCenter:CGPointMake(self.originalCenter, 0.0)
-                                                                                    applyingRatio:gesture.defaultElasticTranslationRatio].x,
-                                                                self.swipeActionsContainerView.center.y);
-            [self.swipeable.swipeActionsView updateVisibleWidth:fabs(CGRectGetMinX(self.swipeActionsContainerView.frame))];
-            if ((self.swipeActionsContainerView.center.x - self.originalCenter) / translation.x != 1.0) {
-                self.scrollRatio = self.elasticScrollRatio;
-            }
-                
-            break;
-        }
-        case UIGestureRecognizerStateEnded:
-        case UIGestureRecognizerStateCancelled:
-        case UIGestureRecognizerStateFailed:
-        {
-            // 已经在中心了
-            if (self.swipeable.swipeState == SWPSwipeStateCenter &&
-                CGRectGetMidX(self.swipeable.bounds) == self.swipeActionsContainerView.center.x)  {
-                return;
-            }
-            
-            // 更新 swipeState
-            self.swipeable.swipeState = [self __targetStateForVelocity:velocity];
-            
-            // 达到滑动目标
-            CGFloat targetOffset = [self __targetCenterWithActive:self.swipeable.swipeState != SWPSwipeStateCenter];
-            CGFloat distance = targetOffset - self.swipeActionsContainerView.center.x;
-            CGFloat normalizedVelocity = velocity.x * self.scrollRatio / distance;
-            [self  __animateToOffset:targetOffset withInitialVelocity:normalizedVelocity completion:^(BOOL complete) {
-                if (self.swipeable.swipeState == SWPSwipeStateCenter) {
-                    [self reset];
-                }
-            }];
-            
-            /// 操作视图消失回调
-            if (self.swipeable.swipeState == SWPSwipeStateCenter) {
-                if ([self.delegate respondsToSelector:@selector(swipeController:didEndEditingSwipeableForOrientation:)]) {
-                    [self.delegate swipeController:self didEndEditingSwipeableForOrientation:self.swipeable.swipeActionsView.orientation];
-                }
-            }
-            break;
-        }
-        default:
-            break;
-    }
-}
-
-/// 点击手势处理
-/// @param gesture 点击手势
-- (void)handleTapGesture:(UITapGestureRecognizer *)gesture
-{
-    [self hideSwipeWithAnimated:YES complation:nil];
-}
-
 #pragma mark - UIGestureRecognizerDelegate
 
 /// 是否处理手势
@@ -398,7 +396,9 @@
 - (void)swipeActionsView:(SWPSwipeActionsView *)swipeActionsView
          didSelectAction:(SWPSwipeAction *)action
 {
-    
+    if (action.handler) {
+        action.handler(action, self.swipeable.indexPath);
+    }
 }
 
 #pragma mark - PublicMethond
@@ -442,7 +442,7 @@
         if (![self __showActionsViewForOrientation:orientation]) {
             return;
         }
-        [self.scrollerView hideSwipeables];
+        [self.swipeable.scrollView hideSwipeables];
         self.swipeable.swipeState = targetState;
     }
     CGFloat maxOffset = fmin(self.swipeable.bounds.size.width, fabs(offset)) * orientation * -1;
