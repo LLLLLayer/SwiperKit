@@ -9,9 +9,15 @@
 
 @protocol SWPSwipeCollectionViewCellDelegate;
 
+@class SWPSwipeController;
+
 NS_ASSUME_NONNULL_BEGIN
 
 @interface SWPSwipeCollectionViewCell : UICollectionViewCell
+
+/// 滑动控制器
+/// Swipe Controller
+@property (nonatomic, strong, readonly, nullable) SWPSwipeController *swipeController;
 
 /// 充当 `SwipeCollectionViewCell` 的委托的对象。
 /// The object that acts as the delegate of the `SwipeCollectionViewCell`.

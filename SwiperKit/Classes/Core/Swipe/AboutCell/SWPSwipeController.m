@@ -9,6 +9,7 @@
 #import "SWPSwipeOptions.h"
 #import "SWPSwipeController.h"
 #import "SWPSwipeActionsView.h"
+#import "UIScrollView+Swipe.h"
 #import "UIPanGestureRecognizer+ElasticTranslation.h"
 
 @interface SWPSwipeController () <SWPSwipeActionsViewDelegate>
@@ -171,7 +172,7 @@
 /// @param completion 动画完成回调
 - (void)__animateToOffset:(CGFloat)offset
       withInitialVelocity:(CGFloat)velocity
-               completion:(void(^)(BOOL complation))completion
+               completion:(void(^)(BOOL complete))completion
 {
     [self __animateWithDuration:0.7 toOffset:offset withInitialVelocity:velocity completion:completion];
 }
@@ -349,7 +350,7 @@
             CGFloat targetOffset = [self __targetCenterWithActive:self.swipeable.swipeState != SWPSwipeStateCenter];
             CGFloat distance = targetOffset - self.swipeActionsContainerView.center.x;
             CGFloat normalizedVelocity = velocity.x * self.scrollRatio / distance;
-            [self  __animateToOffset:targetOffset withInitialVelocity:normalizedVelocity completion:^(BOOL complation) {
+            [self  __animateToOffset:targetOffset withInitialVelocity:normalizedVelocity completion:^(BOOL complete) {
                 if (self.swipeable.swipeState == SWPSwipeStateCenter) {
                     [self reset];
                 }
@@ -372,7 +373,7 @@
 /// @param gesture 点击手势
 - (void)handleTapGesture:(UITapGestureRecognizer *)gesture
 {
-    
+    [self hideSwipeWithAnimated:YES complation:nil];
 }
 
 #pragma mark - UIGestureRecognizerDelegate
@@ -398,6 +399,69 @@
          didSelectAction:(SWPSwipeAction *)action
 {
     
+}
+
+#pragma mark - PublicMethond
+
+- (void)hideSwipeWithAnimated:(BOOL)animated complation:(void(^ _Nullable)(BOOL complete))complation
+{
+    self.swipeable.swipeState = SWPSwipeStateAnimatingToCenter;
+    CGFloat targetCenter = [self __targetCenterWithActive:NO];
+    if (animated) {
+        [self __animateToOffset:targetCenter withInitialVelocity:0 completion:^(BOOL complete) {
+            [self reset];
+            if (complation) {
+                complation(complete);
+            }
+        }];
+    } else {
+        self.swipeActionsContainerView.center = CGPointMake(targetCenter, self.swipeActionsContainerView.center.y);
+        [self.swipeable.swipeActionsView updateVisibleWidth:fabs(CGRectGetMinX(self.swipeActionsContainerView.frame))];
+        [self reset];
+    }
+    if ([self.delegate respondsToSelector:@selector(swipeController:didEndEditingSwipeableForOrientation:)]) {
+        [self.delegate swipeController:self didEndEditingSwipeableForOrientation:self.swipeable.swipeActionsView.orientation];
+    }
+}
+
+- (void)showSwipeWithOrientation:(SWPSwipeActionsOrientation)orientation animated:(BOOL)animated complation:(void(^ _Nullable)(BOOL complete))complation
+{
+    [self setOffset:-0.19990811 * orientation animated:YES completion:complation];
+}
+
+- (void)setOffset:(CGFloat)offset animated:(BOOL)animated completion:(void(^ _Nullable)(BOOL completed))completion
+{
+    if (offset == 0) {
+        [self hideSwipeWithAnimated:animated complation:completion];
+        return;
+    }
+    SWPSwipeActionsOrientation orientation = offset > 0 ? SWPSwipeActionsOrientationLeft : SWPSwipeActionsOrientationRight;
+    SWPSwipeState targetState = offset > 0 ? SWPSwipeStateLeft : SWPSwipeStateRight;
+    
+    if (self.swipeable.swipeState != targetState) {
+        if (![self __showActionsViewForOrientation:orientation]) {
+            return;
+        }
+        [self.scrollerView hideSwipeables];
+        self.swipeable.swipeState = targetState;
+    }
+    CGFloat maxOffset = fmin(self.swipeable.bounds.size.width, fabs(offset)) * orientation * -1;
+    CGFloat targetCenter = CGRectGetMidX(self.swipeable.bounds) + maxOffset;
+    
+    if (fabs(offset) == 0.19990811) {
+        targetCenter = [self __targetCenterWithActive:YES];
+    }
+    
+    if (animated) {
+        [self __animateToOffset:targetCenter withInitialVelocity:0 completion:^(BOOL complete) {
+            if (completion) {
+                completion(complete);
+            }
+        }];
+    } else {
+        self.swipeActionsContainerView.center = CGPointMake(targetCenter, self.swipeActionsContainerView.center.y);
+        [self.swipeable.swipeActionsView updateVisibleWidth:fabs(CGRectGetMinX(self.swipeActionsContainerView.frame))];
+    }
 }
 
 

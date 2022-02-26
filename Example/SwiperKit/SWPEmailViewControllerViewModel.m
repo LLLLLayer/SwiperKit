@@ -9,13 +9,48 @@
 #import "SWPEmailModel.h"
 #import "SWPEmailViewControllerViewModel.h"
 
+#import <SwiperKit/SWPSwipeOptions.h>
+
 @interface SWPEmailViewControllerViewModel ()
 
 @property (nonatomic,   copy) NSArray<NSArray<SWPEmailModel *> *> *sections;
 
+@property (nonatomic, strong) SWPSwipeOptions *options;
+
 @end
 
 @implementation SWPEmailViewControllerViewModel
+
+#pragma mark - Public Methond
+
+- (void)showMore
+{
+    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"SwiperKit" message:@"Swipe Transition Style" preferredStyle:UIAlertControllerStyleActionSheet];
+    SWPEmailViewControllerViewModel * __weak weakSelf = self;
+    [alertController addAction:[UIAlertAction actionWithTitle:@"Border" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        SWPEmailViewControllerViewModel *strongSelf = weakSelf;
+        strongSelf.options.transitionStyle = SWPSwipeTransitionStyleBorder;
+    }]];
+    [alertController addAction:[UIAlertAction actionWithTitle:@"Drag" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        SWPEmailViewControllerViewModel *strongSelf = weakSelf;
+        strongSelf.options.transitionStyle = SWPSwipeTransitionStyleDrag;
+    }]];
+    [alertController addAction:[UIAlertAction actionWithTitle:@"Reveal" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        SWPEmailViewControllerViewModel *strongSelf = weakSelf;
+        strongSelf.options.transitionStyle = SWPSwipeTransitionStyleReveal;
+    }]];
+    [[UIApplication sharedApplication].windows.firstObject.rootViewController presentViewController:alertController animated:TRUE completion:nil];
+}
+
+#pragma mark - Getter
+
+- (SWPSwipeOptions *)options
+{
+    if (!_options) {
+        _options = [[SWPSwipeOptions alloc] init];
+    }
+    return _options;
+}
 
 - (NSArray<NSArray<SWPEmailModel *> *> *)sections
 {

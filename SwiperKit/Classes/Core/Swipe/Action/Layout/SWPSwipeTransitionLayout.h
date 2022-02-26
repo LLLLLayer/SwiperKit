@@ -34,15 +34,12 @@ typedef NS_ENUM(NSInteger, SWPSwipeActionsOrientation);
 
 @end
 
+@interface SWPDragTransitionLayout : NSObject<SWPSwipeTransitionLayout>
 
-//@interface SWPDragTransitionLayout : NSObject<SWPSwipeTransitionLayout>
-//
-//@end
-//
-//@interface SWPRevealTransitionLayout : SWPDragTransitionLayout
-//
-//@end
+@end
 
+@interface SWPRevealTransitionLayout : SWPDragTransitionLayout
 
+@end
 
 NS_ASSUME_NONNULL_END

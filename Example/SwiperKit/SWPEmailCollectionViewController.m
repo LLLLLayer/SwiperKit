@@ -57,7 +57,7 @@ SWPSwipeCollectionViewCellDelegate
 #pragma mark - Action
 - (void)__handleTapMoreButton:(UIBarButtonItem *)buttom
 {
-    // Layer Todo
+    [self.viewModel showMore];
 }
 
 #pragma mark - Getter
@@ -131,12 +131,16 @@ SWPSwipeCollectionViewCellDelegate
     l1.title = @"Read";
     l1.backgroundColor = UIColor.blueColor;
     
-    return orientation == SWPSwipeActionsOrientationLeft ? @[l1] : @[r1, r2, r3];
+    SWPSwipeAction *l2 = [[SWPSwipeAction alloc] init];
+    l2.title = @"Forward";
+    l2.backgroundColor = UIColor.greenColor;
+    
+    return orientation == SWPSwipeActionsOrientationLeft ? @[l1, l2] : @[r1, r2, r3];
 }
 
 - (SWPSwipeOptions *)collectionView:(UICollectionView *)collectionView editActionsOptionsForItemAtIndexPath:(nonnull NSIndexPath *)indexPath forOrientation:(SWPSwipeActionsOrientation)orientation
 {
-    return [SWPSwipeOptions new];
+    return self.viewModel.options;
 }
 
 @end

@@ -44,7 +44,7 @@ typedef NS_ENUM(NSInteger, SWPSwipeState) {
 /// 当前 Cell 的 indexPath
 @property (nonatomic, assign, nullable) NSIndexPath *indexPath;
 
-/// TableView/CollectionView
+/// 所属的 TableView/CollectionView
 @property (nonatomic, strong, nullable) UIScrollView *scrollView;
 
 /// 拖动手势

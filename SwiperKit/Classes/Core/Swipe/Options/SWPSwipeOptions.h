@@ -45,6 +45,7 @@ typedef NS_ENUM(NSInteger, SWPSwipeActionsOrientation) {
 /// 描述提供操作按钮图像和标题时使用的对齐方式。
 /// Describes the alignment mode used when action button images and titles are provided.
 typedef NS_ENUM(NSInteger, SWPSwipeVerticalAlignment) {
+    
     /// 将检查所有按钮，并使用最高的图像和标题文本的第一个基线偏移量来创建对齐矩形。
     /// All actions will be inspected and the tallest image and first baseline offset of title text will be used to create the alignment rectangle.
     SWPSwipeVerticalAlignmentCenterFirstBaseline = 0,
@@ -52,6 +53,7 @@ typedef NS_ENUM(NSInteger, SWPSwipeVerticalAlignment) {
     /// 按钮图像高度和完整标题高度用于创建对齐矩形。
     /// The action button image height and full title height are used to create the aligment rectange.
     SWPSwipeVerticalAlignmentCenter = 1,
+    
 };
 
 /// `Swipe Options` 类为滑动 Cell 的转换行为和扩展行为提供选项配置。
@@ -61,12 +63,6 @@ typedef NS_ENUM(NSInteger, SWPSwipeVerticalAlignment) {
 /// 过渡样式，指在滑动期间操作按钮如何展示的。
 /// The transition style. Transition is the style of how the action buttons are exposed during the swipe.
 @property (nonatomic, assign) SWPSwipeTransitionStyle transitionStyle;
-
-/// 扩展样式，当单元格滑过定义的阈值时的行为。
-/// The expansion style. Expansion is the behavior when the cell is swiped past a defined threshold.
-@property (nonatomic, strong) SWPSwipeExpansionStyle *expansionStyle;
-
-// expansionDelegate
 
 /// 按钮后面的背景颜色。
 /// The background color behind the action buttons.
@@ -91,6 +87,18 @@ typedef NS_ENUM(NSInteger, SWPSwipeVerticalAlignment) {
 /// 按钮图像和按钮标题之间的空间量，以磅为单位。
 /// The amount of space, in points, between the button image and the button title.
 @property (nonatomic, assign) CGFloat buttonSpacing;
+
+/**
+ 
+ 正在开发中，接下来的某个版本会支持。
+ Under development, will be supported in one of the next versions。
+ 
+/// 扩展样式，当单元格滑过定义的阈值时的行为。
+/// The expansion style. Expansion is the behavior when the cell is swiped past a defined threshold.
+@property (nonatomic, strong) SWPSwipeExpansionStyle *expansionStyle;
+ 
+
+ */
 
 @end
 

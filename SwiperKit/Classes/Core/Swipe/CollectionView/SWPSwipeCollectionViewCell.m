@@ -9,14 +9,14 @@
 #import "SWPSwipeOptions.h"
 #import "SWPSwipeController.h"
 #import "SWPSwipeCollectionViewCell.h"
+#import "SWPSwipeCollectionViewCell+Display.h"
 #import "SWPSwipeCollectionViewCellDelegate.h"
 
 @interface SWPSwipeCollectionViewCell () <SWPSwipeable, SWPSwipeControllerDelegate>
 
-@property (nonatomic,   weak, nullable) UICollectionView *collectionView;
-
 @property (nonatomic, strong, nullable) SWPSwipeController *swipeController;
-@property (nonatomic, assign) BOOL isPreviouslySelected;
+
+@property (nonatomic,   weak, nullable) UICollectionView *collectionView;
 
 @end
 
@@ -27,7 +27,6 @@
 @synthesize scrollView;
 @synthesize indexPath;
 @synthesize panGestureRecognizer;
-
 @synthesize frame = _frame;
 @synthesize highlighted = _highlighted;
 
@@ -42,12 +41,14 @@
 
 - (void)dealloc
 {
+    // 移除作为 collectionView 滑动手势的响应者
     [self.collectionView.panGestureRecognizer removeTarget:self action:nil];
 }
 
 - (void)configure
 {
-    self.contentView.clipsToBounds = false;
+    // 设置 contentView 必要布局
+    self.contentView.clipsToBounds = NO;
     if (self.contentView.translatesAutoresizingMaskIntoConstraints) {
         self.contentView.translatesAutoresizingMaskIntoConstraints = NO;
         [NSLayoutConstraint activateConstraints:@[
@@ -58,6 +59,7 @@
         ]];
     }
     
+    // 滑动控制器初始化
     self.swipeController = [[SWPSwipeController alloc] initWithSwipeable:self actionsContainerView:self.contentView];
     self.swipeController.delegate = self;
 }
@@ -69,6 +71,7 @@
     while (view.superview) {
         view = view.superview;
         if ([view isKindOfClass:[UICollectionView class]]) {
+            // 找到自己所属的 collectionView，并添加作为 collectionView 滑动手势的响应者
             self.collectionView = (UICollectionView *)view;
             self.swipeController.scrollerView = self.collectionView;
             [self.collectionView.panGestureRecognizer removeTarget:self action:nil];
@@ -86,20 +89,6 @@
 
 #pragma mark - Setter/Getter
 
-- (CGRect)frame
-{
-    return [super frame];
-}
-
-- (void)setFrame:(CGRect)frame
-{
-    CGRect newValue = frame;
-    if (self.swipeState != SWPSwipeStateCenter) {
-        newValue = CGRectMake(CGRectGetMinX(_frame), CGRectGetMinY(newValue), newValue.size.width, newValue.size.height);
-    }
-    [super setFrame:newValue];
-}
-
 - (BOOL)isHighlighted
 {
     return [super isHighlighted];
@@ -107,6 +96,7 @@
 
 - (void)setHighlighted:(BOOL)highlighted
 {
+    // 非中心不处理 highlighted
     if (self.swipeState != SWPSwipeStateCenter) {
         return;
     }
@@ -133,8 +123,16 @@
 - (void)__handleCollectionPanGesture:(UIPanGestureRecognizer *)gesture
 {
     if (gesture.state == UIGestureRecognizerStateBegan) {
-        // hideSwipe
+        [self hideSwipeWithAnimated:YES complation:nil];
     }
+}
+
+#pragma mark - Reset
+
+- (void)__reset
+{
+    self.contentView.clipsToBounds = NO;
+    [self.swipeController reset];
 }
 
 #pragma mark - SWPSwipeControllerDelegate
@@ -146,16 +144,16 @@
 
 - (NSArray<SWPSwipeAction *> *)swipeController:(SWPSwipeController *)controller editActionsForSwipeableForForOrientation:(SWPSwipeActionsOrientation)orientation
 {
-    NSIndexPath *indexPath = [self.collectionView indexPathForCell:self];
+    NSIndexPath *indexPath = self.indexPath;
     if (indexPath && [self.swipeCollectionViewCelldelegate respondsToSelector:@selector(collectionView:editActionsForItemAtIndexPath:forOrientation:)]) {
-        return [self.swipeCollectionViewCelldelegate collectionView:self.collectionView editActionsForItemAtIndexPath:indexPath forOrientation:orientation];
+        return [self.swipeCollectionViewCelldelegate collectionView:self.collectionView editActionsForItemAtIndexPath:self.indexPath forOrientation:orientation];
     }
     return nil;
 }
 
 - (SWPSwipeOptions *)swipeController:(SWPSwipeController *)controller editActionsOptionsForSwipeableForOrientation:(SWPSwipeActionsOrientation)orientation
 {
-    NSIndexPath *indexPath = [self.collectionView indexPathForCell:self];
+    NSIndexPath *indexPath = self.indexPath;
     SWPSwipeOptions *options;
     if (indexPath && [self.swipeCollectionViewCelldelegate respondsToSelector:@selector(collectionView:editActionsOptionsForItemAtIndexPath:forOrientation:)]) {
         options = [self.swipeCollectionViewCelldelegate collectionView:self.collectionView editActionsOptionsForItemAtIndexPath:indexPath forOrientation:orientation];
@@ -165,7 +163,8 @@
 
 - (void)swipeController:(SWPSwipeController *)controller willBeginEditingSwipeableForOrientation:(SWPSwipeActionsOrientation)orientation
 {
-    NSIndexPath *indexPath = [self.collectionView indexPathForCell:self];
+    NSIndexPath *indexPath = self.indexPath;
+    [super setHighlighted:NO];
     if (indexPath && [self.swipeCollectionViewCelldelegate respondsToSelector:@selector(collectionView:willBeginEditingItemAtIndexPath:forOrientation:)]) {
         [self.swipeCollectionViewCelldelegate collectionView:self.collectionView willBeginEditingItemAtIndexPath:indexPath forOrientation:orientation];
     }
@@ -173,7 +172,7 @@
 
 - (void)swipeController:(SWPSwipeController *)controller didEndEditingSwipeableForOrientation:(SWPSwipeActionsOrientation)orientation
 {
-    NSIndexPath *indexPath = [self.collectionView indexPathForCell:self];
+    NSIndexPath *indexPath = self.indexPath;
     if (indexPath && [self.swipeCollectionViewCelldelegate respondsToSelector:@selector(collectionView:didEndEditingItemAtAtIndexPath:forOrientation:)]) {
         [self.swipeCollectionViewCelldelegate collectionView:self.collectionView didEndEditingItemAtAtIndexPath:indexPath forOrientation:orientation];
     }

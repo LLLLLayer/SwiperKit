@@ -69,10 +69,10 @@
                 self.transitionLayout = [[SWPBorderTransitionLayout alloc] init];
                 break;
             case SWPSwipeTransitionStyleDrag:
-                self.transitionLayout = [[SWPBorderTransitionLayout alloc] init];
+                self.transitionLayout = [[SWPDragTransitionLayout alloc] init];
                 break;
             case SWPSwipeTransitionStyleReveal:
-                self.transitionLayout = [[SWPBorderTransitionLayout alloc] init];
+                self.transitionLayout = [[SWPRevealTransitionLayout alloc] init];
                 break;
             default:
                 NSAssert(NO, @"Illegal parameter: options.transitionStyle");
@@ -115,6 +115,8 @@
     self.layoutContext.contentSize = self.contentSize;
     self.layoutContext.visibleWidth = self.visibleWidth;
     self.layoutContext.minimumButtonWidth = self.minimumButtonWidth;
+    
+    [self.transitionLayout continerView:self didChangeVisibleWidthWithContext:self.layoutContext];
     
     [self setNeedsLayout];
     [self layoutIfNeeded];
