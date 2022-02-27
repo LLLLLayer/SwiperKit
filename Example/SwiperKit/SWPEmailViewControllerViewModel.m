@@ -13,7 +13,7 @@
 
 @interface SWPEmailViewControllerViewModel ()
 
-@property (nonatomic,   copy) NSArray<NSArray<SWPEmailModel *> *> *sections;
+//@property (nonatomic,   copy) NSArray<NSArray<SWPEmailModel *> *> *sections;
 
 @property (nonatomic, strong) SWPSwipeOptions *options;
 

@@ -380,6 +380,18 @@
 /// @param gestureRecognizer 需要判断的手势
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer
 {
+    if ([gestureRecognizer isKindOfClass:[UITapGestureRecognizer class]]) {
+        for (id<SWPSwipeable> swipeable in self.swipeable.scrollView.swipeables) {
+            if (swipeable.swipeState != SWPSwipeStateCenter ||
+                swipeable.panGestureRecognizer.state == UIGestureRecognizerStateBegan ||
+                swipeable.panGestureRecognizer.state == UIGestureRecognizerStateCancelled ||
+                swipeable.panGestureRecognizer.state == UIGestureRecognizerStateEnded) {
+                return YES;
+            }
+        }
+        return NO;
+    }
+    
     if ([gestureRecognizer isKindOfClass:[UIPanGestureRecognizer class]]) {
         UIPanGestureRecognizer *panGesture = (UIPanGestureRecognizer *)gestureRecognizer;
         CGPoint translation = [panGesture translationInView:panGesture.view];

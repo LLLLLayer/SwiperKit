@@ -1,15 +1,15 @@
 //
-//  SWPEmailCollectionViewCell.m
+//  SWPSWPEmailTableViewCell.m
 //  SwiperKit_Example
 //
-//  Created by yangjie.layer on 2022/2/9.
+//  Created by yangjie.layer on 2022/2/26.
 //  Copyright © 2022 LLLLLayer. All rights reserved.
 //
 
 #import "SWPEmailModel.h"
-#import "SWPEmailCollectionViewCell.h"
+#import "SWPSWPEmailTableViewCell.h"
 
-@interface SWPEmailCollectionViewCell ()
+@interface SWPSWPEmailTableViewCell ()
 
 @property (nonatomic, strong) UILabel *title;
 @property (nonatomic, strong) UILabel *subtitle;
@@ -19,16 +19,16 @@
 
 @end
 
-@implementation SWPEmailCollectionViewCell
+@implementation SWPSWPEmailTableViewCell
 
 + (NSString *)identifier
 {
-    return NSStringFromClass(SWPEmailCollectionViewCell.class);
+    return NSStringFromClass(SWPSWPEmailTableViewCell.class);
 }
 
-- (instancetype)initWithFrame:(CGRect)frame
+- (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
-    self = [super initWithFrame:frame];
+    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
     if (self) {
         [self __setupUI];
     }

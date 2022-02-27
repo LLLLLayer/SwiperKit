@@ -9,7 +9,13 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@protocol SWPSwipeable;
+
 @interface UITableView (Swipe)
+
+- (NSArray<id<SWPSwipeable>> * _Nullable)swipeCells;
+
+- (void)hideSwipeCell;
 
 @end
 

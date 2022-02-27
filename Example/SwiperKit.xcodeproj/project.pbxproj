@@ -11,6 +11,8 @@
 		2B239D7627B38E54005B1A2D /* SWPEmailModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 2B239D7527B38E54005B1A2D /* SWPEmailModel.m */; };
 		2B239D7927B39267005B1A2D /* SWPEmailViewControllerViewModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 2B239D7827B39267005B1A2D /* SWPEmailViewControllerViewModel.m */; };
 		2B239D7C27B3B6AF005B1A2D /* SWPEmailCollectionViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2B239D7B27B3B6AF005B1A2D /* SWPEmailCollectionViewCell.m */; };
+		2B26BE8527CA531A0044E4F4 /* SWPEmailTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2B26BE8427CA531A0044E4F4 /* SWPEmailTableViewController.m */; };
+		2B26BE8827CA55150044E4F4 /* SWPSWPEmailTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2B26BE8727CA55150044E4F4 /* SWPSWPEmailTableViewCell.m */; };
 		4752A52DC7048FAFDBD80249 /* Pods_SwiperKit_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 13F5B90439AC21C5C6F7D876 /* Pods_SwiperKit_Example.framework */; };
 		6003F58E195388D20070C39A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6003F58D195388D20070C39A /* Foundation.framework */; };
 		6003F590195388D20070C39A /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6003F58F195388D20070C39A /* CoreGraphics.framework */; };
@@ -49,6 +51,10 @@
 		2B239D7827B39267005B1A2D /* SWPEmailViewControllerViewModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SWPEmailViewControllerViewModel.m; sourceTree = "<group>"; };
 		2B239D7A27B3B6AF005B1A2D /* SWPEmailCollectionViewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SWPEmailCollectionViewCell.h; sourceTree = "<group>"; };
 		2B239D7B27B3B6AF005B1A2D /* SWPEmailCollectionViewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SWPEmailCollectionViewCell.m; sourceTree = "<group>"; };
+		2B26BE8327CA531A0044E4F4 /* SWPEmailTableViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SWPEmailTableViewController.h; sourceTree = "<group>"; };
+		2B26BE8427CA531A0044E4F4 /* SWPEmailTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SWPEmailTableViewController.m; sourceTree = "<group>"; };
+		2B26BE8627CA55150044E4F4 /* SWPSWPEmailTableViewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SWPSWPEmailTableViewCell.h; sourceTree = "<group>"; };
+		2B26BE8727CA55150044E4F4 /* SWPSWPEmailTableViewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SWPSWPEmailTableViewCell.m; sourceTree = "<group>"; };
 		53C496242855470E8E3CB5EC /* Pods-SwiperKit_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwiperKit_Example.release.xcconfig"; path = "Target Support Files/Pods-SwiperKit_Example/Pods-SwiperKit_Example.release.xcconfig"; sourceTree = "<group>"; };
 		6003F58A195388D20070C39A /* SwiperKit_Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SwiperKit_Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6003F58D195388D20070C39A /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -116,6 +122,10 @@
 		2B26BE8127CA20190044E4F4 /* TableView */ = {
 			isa = PBXGroup;
 			children = (
+				2B26BE8327CA531A0044E4F4 /* SWPEmailTableViewController.h */,
+				2B26BE8427CA531A0044E4F4 /* SWPEmailTableViewController.m */,
+				2B26BE8627CA55150044E4F4 /* SWPSWPEmailTableViewCell.h */,
+				2B26BE8727CA55150044E4F4 /* SWPSWPEmailTableViewCell.m */,
 			);
 			name = TableView;
 			sourceTree = "<group>";
@@ -408,7 +418,9 @@
 				2B239D7927B39267005B1A2D /* SWPEmailViewControllerViewModel.m in Sources */,
 				6003F59E195388D20070C39A /* SWPAppDelegate.m in Sources */,
 				2B239D7627B38E54005B1A2D /* SWPEmailModel.m in Sources */,
+				2B26BE8827CA55150044E4F4 /* SWPSWPEmailTableViewCell.m in Sources */,
 				6003F5A7195388D20070C39A /* SWPEmailCollectionViewController.m in Sources */,
+				2B26BE8527CA531A0044E4F4 /* SWPEmailTableViewController.m in Sources */,
 				6003F59A195388D20070C39A /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

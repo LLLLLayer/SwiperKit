@@ -6,6 +6,7 @@
 //
 
 #import "UIScrollView+Swipe.h"
+#import "UITableView+Swipe.h"
 #import "UICollectionView+Swipe.h"
 
 @implementation UIScrollView (Swipe)
@@ -16,6 +17,10 @@
         UICollectionView *collectionView = (UICollectionView *)self;
         return [collectionView swipeCells];
     }
+    if ([self isKindOfClass:[UITableView class]]) {
+        UITableView *tableView = (UITableView *)self;
+        return [tableView swipeCells];
+    }
     return nil;
 }
 
@@ -24,6 +29,10 @@
     if ([self isKindOfClass:[UICollectionView class]]) {
         UICollectionView *collectionView = (UICollectionView *)self;
         [collectionView hideSwipeCell];
+    }
+    if ([self isKindOfClass:[UITableView class]]) {
+        UITableView *tableView = (UITableView *)self;
+        [tableView hideSwipeCell];
     }
 }
 

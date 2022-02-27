@@ -9,6 +9,7 @@
 #import "SWPEmailCollectionViewCell.h"
 #import "SWPEmailViewControllerViewModel.h"
 #import "SWPEmailCollectionViewController.h"
+#import "SWPEmailTableViewController.h"
 
 #import <SwiperKit/SWPSwipeAction.h>
 #import <SwiperKit/SWPSwipeOptions.h>
@@ -43,21 +44,33 @@ SWPSwipeCollectionViewCellDelegate
 - (void)__setupUI
 {
     // NavigationBar
-    self.title = @"Email";
+    self.title = @"Email - CollectionView";
     UIBarButtonItem *moreButton = [[UIBarButtonItem alloc] initWithImage:[UIImage systemImageNamed:@"ellipsis"]
                                                                 style:UIBarButtonItemStylePlain
                                                                target:self
                                                                action:@selector(__handleTapMoreButton:)];
     self.navigationItem.rightBarButtonItem = moreButton;
     
+    UIBarButtonItem *otherPageButton = [[UIBarButtonItem alloc] initWithTitle:@"TransferToTableView"
+                                                                        style:UIBarButtonItemStylePlain
+                                                                       target:self
+                                                                       action:@selector(__handleTapotherPageButton:)];
+    self.navigationItem.leftBarButtonItem = otherPageButton;
+    
     // Others
     [self.view addSubview:self.collectionView];
 }
 
 #pragma mark - Action
+
 - (void)__handleTapMoreButton:(UIBarButtonItem *)buttom
 {
     [self.viewModel showMore];
+}
+
+- (void)__handleTapotherPageButton:(UIBarButtonItem *)buttom
+{
+    [self.navigationController pushViewController:[[SWPEmailTableViewController alloc] init] animated:YES];
 }
 
 #pragma mark - Getter
@@ -126,6 +139,14 @@ SWPSwipeCollectionViewCellDelegate
     SWPSwipeAction *r3 = [[SWPSwipeAction alloc] init];
     r3.title = @"Trash";
     r3.backgroundColor = UIColor.redColor;
+    r3.handler = ^(SWPSwipeAction * _Nonnull ation, NSIndexPath * _Nonnull indexPath) {
+        NSMutableArray *tempSection = self.viewModel.sections[indexPath.section].mutableCopy;
+        [tempSection removeObjectAtIndex:indexPath.item];
+        NSMutableArray *tempSections = self.viewModel.sections.mutableCopy;
+        tempSections[indexPath.section] = tempSection;
+        self.viewModel.sections = tempSections.copy;
+        [self.collectionView reloadData];
+    };
     
     SWPSwipeAction *l1 = [[SWPSwipeAction alloc] init];
     l1.title = @"Read";

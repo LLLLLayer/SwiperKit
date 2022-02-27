@@ -15,7 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface SWPEmailViewControllerViewModel : NSObject
 
-@property (nonatomic,   copy, readonly) NSArray<NSArray<SWPEmailModel *> *> *sections;
+@property (nonatomic,   copy, readwrite) NSArray<NSArray<SWPEmailModel *> *> *sections;
 
 @property (nonatomic, strong, readonly) SWPSwipeOptions *options;
 

@@ -8,6 +8,8 @@
 #import "SWPSwipeable.h"
 #import "SWPSwipeOptions.h"
 #import "SWPSwipeController.h"
+#import "SWPSwipeActionsView.h"
+#import "UICollectionView+Swipe.h"
 #import "SWPSwipeCollectionViewCell.h"
 #import "SWPSwipeCollectionViewCell+Display.h"
 #import "SWPSwipeCollectionViewCellDelegate.h"
@@ -27,8 +29,6 @@
 @synthesize scrollView;
 @synthesize indexPath;
 @synthesize panGestureRecognizer;
-@synthesize frame = _frame;
-@synthesize highlighted = _highlighted;
 
 - (instancetype)initWithFrame:(CGRect)frame
 {
@@ -77,6 +77,38 @@
             [self.collectionView.panGestureRecognizer addTarget:self action:@selector(__handleCollectionPanGesture:)];
         }
     }
+}
+
+#pragma mark - Touch
+
+/// 在这里覆盖 hitTest(_:with:) 以便 `actionsView` 获得触摸事件,否则， `contentView` 将吞下它并将其传递给 collection
+- (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event
+{
+    if (!self.swipeActionsView || self.isHidden) {
+        return [super hitTest:point withEvent:event];
+    }
+    CGPoint modifiedPoint = [self.swipeActionsView convertPoint:point fromView:self];
+    return [self.swipeActionsView hitTest:modifiedPoint withEvent:event] ?: [super hitTest:point withEvent:event];
+}
+
+- (BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event
+{
+    if (!self.superview) {
+        return NO;
+    }
+    CGPoint poi = [self convertPoint:point toView:self.superview];
+    for (SWPSwipeCollectionViewCell *cell in [self.collectionView swipeCells]) {
+        if ((cell.swipeState == SWPSwipeStateLeft || cell.swipeState == SWPSwipeStateRight) && ![cell containsPoint:poi]) {
+            [self.collectionView hideSwipeCell];
+            return NO;
+        }
+    }
+    return [self containsPoint:poi];
+}
+
+- (BOOL)containsPoint:(CGPoint)point
+{
+    return CGRectContainsPoint(self.frame, point);
 }
 
 #pragma mark - UIGestureRecognizerDelegate

@@ -14,6 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface UIScrollView (Swipe)
 
 - (NSArray<id<SWPSwipeable>> * _Nullable)swipeables;
+
 - (void)hideSwipeables;
 
 @end
