@@ -119,15 +119,27 @@ SWPSwipeTableViewCellDelegate
 {
     SWPSwipeAction *r1 = [[SWPSwipeAction alloc] init];
     r1.title = @"More";
-    r1.backgroundColor = UIColor.grayColor;
-    
+    r1.backgroundColor = [UIColor grayColor];
+    r1.textColor = [UIColor whiteColor];
+    r1.highlightedTextColor = [UIColor blackColor];
+    r1.image = [[UIImage systemImageNamed:@"ellipsis.circle"] imageWithTintColor:[UIColor whiteColor] renderingMode:UIImageRenderingModeAlwaysOriginal];
+    r1.highlightedImage = [[UIImage systemImageNamed:@"ellipsis.circle"] imageWithTintColor:[UIColor blackColor] renderingMode:UIImageRenderingModeAlwaysOriginal];
+
     SWPSwipeAction *r2 = [[SWPSwipeAction alloc] init];
     r2.title = @"Flag";
     r2.backgroundColor = UIColor.orangeColor;
+    r2.textColor = [UIColor whiteColor];
+    r2.highlightedTextColor = [UIColor blackColor];
+    r2.image = [[UIImage systemImageNamed:@"flag.circle"] imageWithTintColor:[UIColor whiteColor] renderingMode:UIImageRenderingModeAlwaysOriginal];
+    r2.highlightedImage = [[UIImage systemImageNamed:@"flag.circle"] imageWithTintColor:[UIColor blackColor] renderingMode:UIImageRenderingModeAlwaysOriginal];
     
     SWPSwipeAction *r3 = [[SWPSwipeAction alloc] init];
     r3.title = @"Trash";
     r3.backgroundColor = UIColor.redColor;
+    r3.textColor = [UIColor whiteColor];
+    r3.highlightedTextColor = [UIColor blackColor];
+    r3.image = [[UIImage systemImageNamed:@"trash.circle"] imageWithTintColor:[UIColor whiteColor] renderingMode:UIImageRenderingModeAlwaysOriginal];
+    r3.highlightedImage = [[UIImage systemImageNamed:@"trash.circle"] imageWithTintColor:[UIColor blackColor] renderingMode:UIImageRenderingModeAlwaysOriginal];
     r3.handler = ^(SWPSwipeAction * _Nonnull ation, NSIndexPath * _Nonnull indexPath) {
         NSMutableArray *tempSection = self.viewModel.sections[indexPath.section].mutableCopy;
         [tempSection removeObjectAtIndex:indexPath.item];
@@ -140,10 +152,18 @@ SWPSwipeTableViewCellDelegate
     SWPSwipeAction *l1 = [[SWPSwipeAction alloc] init];
     l1.title = @"Read";
     l1.backgroundColor = UIColor.blueColor;
+    l1.textColor = [UIColor whiteColor];
+    l1.highlightedTextColor = [UIColor blackColor];
+    l1.image = [[UIImage systemImageNamed:@"bookmark.circle"] imageWithTintColor:[UIColor whiteColor] renderingMode:UIImageRenderingModeAlwaysOriginal];
+    l1.highlightedImage = [[UIImage systemImageNamed:@"bookmark.circle"] imageWithTintColor:[UIColor blackColor] renderingMode:UIImageRenderingModeAlwaysOriginal];
     
     SWPSwipeAction *l2 = [[SWPSwipeAction alloc] init];
     l2.title = @"Forward";
     l2.backgroundColor = UIColor.greenColor;
+    l2.textColor = [UIColor whiteColor];
+    l2.highlightedTextColor = [UIColor blackColor];
+    l2.image = [[UIImage systemImageNamed:@"arrowshape.turn.up.right.circle"] imageWithTintColor:[UIColor whiteColor] renderingMode:UIImageRenderingModeAlwaysOriginal];
+    l2.highlightedImage = [[UIImage systemImageNamed:@"arrowshape.turn.up.right.circle"] imageWithTintColor:[UIColor blackColor] renderingMode:UIImageRenderingModeAlwaysOriginal];
     
     return orientation == SWPSwipeActionsOrientationLeft ? @[l1, l2] : @[r1, r2, r3];
 }

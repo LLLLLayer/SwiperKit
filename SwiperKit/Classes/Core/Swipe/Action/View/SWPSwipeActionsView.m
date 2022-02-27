@@ -148,7 +148,7 @@
     }
     
     // 计算按钮最小完整宽度
-    CGFloat maximum = self.options.maximumButtonWidth != 0 ?: (size.width - 30.0) / (CGFloat)actions.count;
+    CGFloat maximum = self.options.maximumButtonWidth != 0 ?: ((size.width - 30.0) / (CGFloat)actions.count);
     CGFloat minimum = self.options.minimumButtonWidth != 0 ?: fmin(maximum, 74.0);
     self.minimumButtonWidth = minimum;
     for (SWPSwipeActionButton *buton in swipeActionButtons) {
@@ -167,12 +167,19 @@
         wrapperView.translatesAutoresizingMaskIntoConstraints = NO;
         [wrapperView addSubview:button];
         if (action.backgroundEffect) {
-            // Layer TODO: backgroundEffect
+            UIVisualEffectView *effectView = [[UIVisualEffectView alloc] initWithEffect:action.backgroundEffect];
+            effectView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+            [effectView.contentView addSubview:wrapperView];
+            [self addSubview:effectView];
         } else {
             [self addSubview:wrapperView];
         }
         
         button.frame = wrapperView.contentRect;
+        button.maximumImageHeight = [self maximumImageHeight];
+        button.verticalAlignment = self.options.buttonVerticalAlignment;
+        button.shouldHighlight = !!self.options.backgroundColor;
+        
         [[wrapperView.leftAnchor constraintEqualToAnchor:self.leftAnchor] setActive:YES];
         [[wrapperView.rightAnchor constraintEqualToAnchor:self.rightAnchor] setActive:YES];
         [[wrapperView.topAnchor constraintEqualToAnchor:self.topAnchor] setActive:YES];
@@ -214,6 +221,15 @@
     return CGSizeMake(self.visibleWidth, self.bounds.size.height);
 //    CGFloat scrollRatio = fmax(0, self.visibleWidth - self.preferredWidth);
 //    return CGSizeMake(self.preferredWidth + (scrollRatio * 0.25), self.bounds.size.height);
+}
+
+- (CGFloat)maximumImageHeight
+{
+    CGFloat maximumImageHeight = 0;
+    for (SWPSwipeAction *action in self.actions) {
+        maximumImageHeight = fmax(maximumImageHeight, action.image.size.height);
+    }
+    return maximumImageHeight;
 }
 
 #pragma mark - Action

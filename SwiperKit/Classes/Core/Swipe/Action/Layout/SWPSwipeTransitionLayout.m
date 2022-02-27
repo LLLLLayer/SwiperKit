@@ -41,7 +41,8 @@
 
 - (void)continerView:(nonnull UIView *)view didChangeVisibleWidthWithContext:(nonnull SWPActionsViewLayoutContext *)context
 {
-    view.bounds = CGRectMake((context.contentSize.width - context.visibleWidth) * context.orientation, view.bounds.origin.y, view.bounds.size.width, view.bounds.size.width);
+    view.bounds = CGRectMake((context.contentSize.width - context.visibleWidth) * context.orientation,
+                             view.bounds.origin.y, view.bounds.size.width, view.bounds.size.width);
 }
 
 - (void)layoutView:(nonnull UIView *)view atIndex:(NSInteger)index withContext:(nonnull SWPActionsViewLayoutContext *)context
@@ -69,7 +70,6 @@
                              view.bounds.origin.y, view.bounds.size.width, view.bounds.size.width);
 }
 
-
 - (void)layoutView:(nonnull UIView *)view atIndex:(NSInteger)index withContext:(nonnull SWPActionsViewLayoutContext *)context
 {
     return [super layoutView:view atIndex:index withContext:context];
@@ -77,7 +77,12 @@
 
 - (nonnull NSArray<NSNumber *> *)visibleWidthsForViewsWithContext:(nonnull SWPActionsViewLayoutContext *)context
 {
-    return [super visibleWidthsForViewsWithContext:context];
+    NSArray *tempArray = [super visibleWidthsForViewsWithContext:context];
+    NSMutableArray *tempMutableArray = [[NSMutableArray alloc] initWithCapacity:tempArray.count];
+    for (id obj in tempArray.reverseObjectEnumerator) {
+        [tempMutableArray addObject:obj];
+    }
+    return tempMutableArray;
 }
 
 @end

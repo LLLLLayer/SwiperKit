@@ -13,8 +13,6 @@
 
 @interface SWPEmailViewControllerViewModel ()
 
-//@property (nonatomic,   copy) NSArray<NSArray<SWPEmailModel *> *> *sections;
-
 @property (nonatomic, strong) SWPSwipeOptions *options;
 
 @end
@@ -48,6 +46,7 @@
 {
     if (!_options) {
         _options = [[SWPSwipeOptions alloc] init];
+        _options.backgroundColor = [UIColor clearColor];
     }
     return _options;
 }

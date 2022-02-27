@@ -71,15 +71,6 @@
 
 #pragma mark - Touch
 
-- (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event
-{
-    UIView *view = [super hitTest:point withEvent:event];
-    if (view) {
-        NSLog(@"[yj] %s line:%d 1", __FUNCTION__, __LINE__);
-    }
-    return view;
-}
-
 - (BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event
 {
     if (!self.superview) {

@@ -94,14 +94,14 @@ typedef NS_ENUM(NSInteger, SWPExpansionFulfillmentStyle) {
 ///
 /// @note: 必须指定标题或图像。
 /// @note: You must specify a title or an image.
-@property (nonatomic, strong, nullable) UIColor *image;
+@property (nonatomic, strong, nullable) UIImage *image;
 
 /// 操作按钮的高亮图像。
 /// The highlighted image used for the action button.
 ///
 /// @note: @note：如果你没有指定高亮图像，默认的 `image` 用于高亮状态。
 /// @note: If you do not specify a highlight image, the default `image` is used for the highlighted state.
-@property (nonatomic, strong, nullable) UIColor *highlightedImage;
+@property (nonatomic, strong, nullable) UIImage *highlightedImage;
 
 /// 操作按钮的背景颜色。
 /// The background color of the action button.
@@ -122,7 +122,7 @@ typedef NS_ENUM(NSInteger, SWPExpansionFulfillmentStyle) {
 ///
 /// @note: 为该属性分配一个视觉效果对象会将该效果添加到操作按钮的背景中。
 /// @note: Assigning a visual effect object to this property adds that effect to the background of the action button.
-@property (nonatomic, strong, nullable) UIColor *backgroundEffect;
+@property (nonatomic, strong, nullable) UIVisualEffect *backgroundEffect;
 
 /// 一个布尔值，用于确定操作视图是否在选择时自动隐藏。
 /// A Boolean value that determines whether the actions menu is automatically hidden upon selection.

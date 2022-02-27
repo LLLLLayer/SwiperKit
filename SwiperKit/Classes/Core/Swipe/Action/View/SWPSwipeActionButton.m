@@ -12,6 +12,8 @@
 
 @interface SWPSwipeActionButton ()
 
+@property (nonatomic, strong) UIColor *highlightedBackgroundColor;
+
 @end
 
 @implementation SWPSwipeActionButton
@@ -20,12 +22,31 @@
 {
     self = [super init];
     if (self) {
-        self.spacing = 8.0;
+        self.contentHorizontalAlignment = UIControlContentHorizontalAlignmentCenter;
+        
+        UIColor *highlightedTextColor = action.highlightedTextColor ?: self.tintColor;
+        self.highlightedBackgroundColor = action.highlightedBackgroundColor ?: [[UIColor blackColor] colorWithAlphaComponent:0.1];
+        
+        [self.titleLabel setFont:action.font ?: [UIFont systemFontOfSize:15.0 weight:UIFontWeightMedium]];
+        self.titleLabel.textAlignment = NSTextAlignmentCenter;
+        self.titleLabel.lineBreakMode = NSLineBreakByWordWrapping;
+        self.titleLabel.numberOfLines = 0;
+        
         [self setTitle:action.title forState:UIControlStateNormal];
-        [self.titleLabel setFont:action.font ?: [UIFont systemFontOfSize:15.0]];
-        [self.titleLabel setTextAlignment:NSTextAlignmentCenter];
+        [self setTitleColor:action.textColor forState:UIControlStateNormal];
+        [self setTitleColor:highlightedTextColor forState:UIControlStateHighlighted];
+        [self setImage:action.image forState:UIControlStateNormal];
+        [self setImage:action.highlightedImage ?: action.image forState:UIControlStateHighlighted];
     }
     return self;
+}
+
+- (void)setHighlighted:(BOOL)highlighted
+{
+    [super setHighlighted:highlighted];
+    if (self.shouldHighlight) {
+        self.backgroundColor = highlighted ? self.highlightedBackgroundColor : [UIColor clearColor];
+    }
 }
 
 - (UIEdgeInsets)buttonEdgeInsetsFromOptions:(SWPSwipeOptions *)options

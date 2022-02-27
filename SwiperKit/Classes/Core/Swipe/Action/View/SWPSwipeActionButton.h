@@ -9,6 +9,8 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+typedef NS_ENUM(NSInteger, SWPSwipeVerticalAlignment);
+
 @class SWPSwipeOptions;
 @class SWPSwipeAction;
 
@@ -16,8 +18,16 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, assign) CGFloat spacing;
 
+@property (nonatomic, assign) CGFloat maximumImageHeight;
+
+@property (nonatomic, assign) SWPSwipeVerticalAlignment verticalAlignment;
+
+@property (nonatomic, assign) BOOL shouldHighlight;
+
 - (instancetype)initWithAction:(SWPSwipeAction *)action;
+
 - (UIEdgeInsets)buttonEdgeInsetsFromOptions:(SWPSwipeOptions *)options;
+
 - (CGFloat)preferredWidthMaximum:(CGFloat)maximum;
 
 @end
