@@ -29,6 +29,9 @@ typedef NS_ENUM(NSInteger, SWPSwipeActionsOrientation);
 /// 操作视图
 @interface SWPSwipeActionsView : UIView
 
+/// 滑动配置
+@property (nonatomic, strong) SWPSwipeOptions *options;
+
 /// 代理
 @property (nonatomic,   weak) id<SWPSwipeActionsViewDelegate> _Nullable delegate;
 
@@ -38,7 +41,10 @@ typedef NS_ENUM(NSInteger, SWPSwipeActionsOrientation);
 /// 操作视图优选宽度
 @property (nonatomic, assign, readonly) CGFloat preferredWidth;
 
-/// Layer TODO:
+/// 按钮最小完整宽度
+@property (nonatomic, assign, readonly) CGFloat minimumButtonWidth;
+
+
 @property (nonatomic, assign, readonly) BOOL expanded;
 
 /// 构造操作视图
@@ -54,6 +60,12 @@ typedef NS_ENUM(NSInteger, SWPSwipeActionsOrientation);
 /// 更新当前可见宽度
 /// @param visibleWidth 更新当前可见宽度
 -(void)updateVisibleWidth:(CGFloat)visibleWidth;
+
+-(void)updateExpanded:(BOOL)expanded;
+
+- (SWPSwipeAction *)expandableAction;
+
+- (UIView *)createDeletionMask;
 
 @end
 

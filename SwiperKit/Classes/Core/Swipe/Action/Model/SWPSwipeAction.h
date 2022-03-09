@@ -29,6 +29,8 @@ typedef NS_ENUM(NSInteger, SWPSwipeActionStyle) {
 /// Constants that help define the appearance of action buttons.
 typedef NS_ENUM(NSInteger, SWPExpansionFulfillmentStyle) {
     
+    SWPExpansionFulfillmentStyleNone,
+    
     /// 表示该项目将在操作完成后被删除。
     /// Implies the item will be deleted upon action fulfillment.
     SWPExpansionFulfillmentStyleDelete,
@@ -134,6 +136,8 @@ typedef NS_ENUM(NSInteger, SWPExpansionFulfillmentStyle) {
 /// 当用户点击与此操作关联的按钮时要执行的闭包。
 /// The closure to execute when the user taps the button associated with this action.
 @property (nonatomic, strong, nullable) void (^handler)(SWPSwipeAction *ation, NSIndexPath *indexPath);
+
+@property (nonatomic, strong, nullable) void (^completionHandler)(SWPExpansionFulfillmentStyle style);
 
 @end
 

@@ -10,10 +10,12 @@
 #import "SWPEmailViewControllerViewModel.h"
 
 #import <SwiperKit/SWPSwipeOptions.h>
+#import <SwiperKit/SWPSwipeExpansionStyle.h>
 
 @interface SWPEmailViewControllerViewModel ()
 
 @property (nonatomic, strong) SWPSwipeOptions *options;
+@property (nonatomic, strong) SWPSwipeOptions *leftOptions;
 
 @end
 
@@ -23,7 +25,9 @@
 
 - (void)showMore
 {
-    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"SwiperKit" message:@"Swipe Transition Style" preferredStyle:UIAlertControllerStyleActionSheet];
+    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"SwiperKit"
+                                                                             message:@"Swipe Transition Style"
+                                                                      preferredStyle:UIAlertControllerStyleActionSheet];
     SWPEmailViewControllerViewModel * __weak weakSelf = self;
     [alertController addAction:[UIAlertAction actionWithTitle:@"Border" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         SWPEmailViewControllerViewModel *strongSelf = weakSelf;
@@ -37,7 +41,19 @@
         SWPEmailViewControllerViewModel *strongSelf = weakSelf;
         strongSelf.options.transitionStyle = SWPSwipeTransitionStyleReveal;
     }]];
-    [[UIApplication sharedApplication].windows.firstObject.rootViewController presentViewController:alertController animated:TRUE completion:nil];
+    [alertController addAction:[UIAlertAction actionWithTitle:@"Destructive" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        SWPEmailViewControllerViewModel *strongSelf = weakSelf;
+        strongSelf.options.expansionStyle = [SWPSwipeExpansionStyle destructive];
+    }]];
+    [alertController addAction:[UIAlertAction actionWithTitle:@"Destructive After Fill" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        SWPEmailViewControllerViewModel *strongSelf = weakSelf;
+        strongSelf.options.expansionStyle = [SWPSwipeExpansionStyle destructiveAfterFill];
+    }]];
+    [alertController addAction:[UIAlertAction actionWithTitle:@"Destructive Second Confirmation" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        SWPEmailViewControllerViewModel *strongSelf = weakSelf;
+        strongSelf.options.expansionStyle = [SWPSwipeExpansionStyle destructiveSecondConfirmation];
+    }]];
+    [[UIApplication sharedApplication].windows.firstObject.rootViewController presentViewController:alertController animated:YES completion:nil];
 }
 
 #pragma mark - Getter
@@ -47,8 +63,19 @@
     if (!_options) {
         _options = [[SWPSwipeOptions alloc] init];
         _options.backgroundColor = [UIColor clearColor];
+        _options.expansionStyle = [SWPSwipeExpansionStyle destructiveAfterFill];
     }
     return _options;
+}
+
+- (SWPSwipeOptions *)leftOptions
+{
+    if (!_leftOptions) {
+        _leftOptions = [[SWPSwipeOptions alloc] init];
+        _leftOptions.backgroundColor = [UIColor clearColor];
+        _leftOptions.expansionStyle = [SWPSwipeExpansionStyle selection];
+    }
+    return _leftOptions;
 }
 
 - (NSArray<NSArray<SWPEmailModel *> *> *)sections

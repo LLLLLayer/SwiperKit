@@ -18,6 +18,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic,   copy, readwrite) NSArray<NSArray<SWPEmailModel *> *> *sections;
 
 @property (nonatomic, strong, readonly) SWPSwipeOptions *options;
+@property (nonatomic, strong, readonly) SWPSwipeOptions *leftOptions;
 
 - (void)showMore;
 

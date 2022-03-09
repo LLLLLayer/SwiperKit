@@ -11,11 +11,13 @@
 
 @interface SWPSWPEmailTableViewCell ()
 
+@property (nonatomic, strong) SWPEmailModel *model;
 @property (nonatomic, strong) UILabel *title;
 @property (nonatomic, strong) UILabel *subtitle;
 @property (nonatomic, strong) UILabel *body;
 @property (nonatomic, strong) UILabel *date;
 @property (nonatomic, strong) UIImageView *icon;
+@property (nonatomic, strong) UIView *dot;
 
 @end
 
@@ -80,15 +82,38 @@
         [self.date.widthAnchor constraintGreaterThanOrEqualToConstant:0],
         [self.date.heightAnchor constraintEqualToAnchor:self.title.heightAnchor]
     ]];
+    
+    [self.contentView addSubview:self.dot];
+    self.dot.translatesAutoresizingMaskIntoConstraints = NO;
+    [NSLayoutConstraint activateConstraints:@[
+        [self.dot.leftAnchor constraintEqualToAnchor:self.title.rightAnchor constant:8.0],
+        [self.dot.centerYAnchor constraintEqualToAnchor:self.title.centerYAnchor],
+        [self.dot.widthAnchor constraintEqualToConstant:10],
+        [self.dot.heightAnchor constraintEqualToConstant:10],
+    ]];
 }
 
 - (void)configWithEmailModel:(SWPEmailModel *)model
 {
+    [self.model removeObserver:self forKeyPath:@"read" context:nil];
     self.title.text = model.title;
     self.subtitle.text = model.subTitle;
     self.body.text = model.body;
     self.date.text = model.formattorDate;
+    self.dot.hidden = model.read;
+    [model addObserver:self forKeyPath:@"read" options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew context:nil];
 }
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context
+{
+    self.dot.hidden = [(NSNumber *)change[NSKeyValueChangeNewKey] boolValue];
+}
+
+- (void)dealloc
+{
+    [self.model removeObserver:self forKeyPath:@"read" context:nil];
+}
+
 
 #pragma mark - Getter
 
@@ -145,6 +170,16 @@
         _icon.tintColor = UIColor.tertiaryLabelColor;
     }
     return _icon;
+}
+
+- (UIView *)dot
+{
+    if (!_dot) {
+        _dot = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, 10)];
+        _dot.backgroundColor = UIColor.redColor;
+        _dot.layer.cornerRadius = 5;
+    }
+    return _dot;
 }
 
 @end

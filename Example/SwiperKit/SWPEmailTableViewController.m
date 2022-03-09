@@ -10,6 +10,7 @@
 #import "SWPEmailTableViewController.h"
 #import "SWPEmailViewControllerViewModel.h"
 #import "SWPEmailCollectionViewController.h"
+#import "SWPEmailModel.h"
 
 #import <SwiperKit/SWPSwipeAction.h>
 #import <SwiperKit/SWPSwipeOptions.h>
@@ -146,7 +147,6 @@ SWPSwipeTableViewCellDelegate
         NSMutableArray *tempSections = self.viewModel.sections.mutableCopy;
         tempSections[indexPath.section] = tempSection;
         self.viewModel.sections = tempSections.copy;
-        [self.tableView reloadData];
     };
     
     SWPSwipeAction *l1 = [[SWPSwipeAction alloc] init];
@@ -156,21 +156,17 @@ SWPSwipeTableViewCellDelegate
     l1.highlightedTextColor = [UIColor blackColor];
     l1.image = [[UIImage systemImageNamed:@"bookmark.circle"] imageWithTintColor:[UIColor whiteColor] renderingMode:UIImageRenderingModeAlwaysOriginal];
     l1.highlightedImage = [[UIImage systemImageNamed:@"bookmark.circle"] imageWithTintColor:[UIColor blackColor] renderingMode:UIImageRenderingModeAlwaysOriginal];
+    l1.handler = ^(SWPSwipeAction * _Nonnull ation, NSIndexPath * _Nonnull indexPath) {
+        SWPEmailModel *model = self.viewModel.sections[indexPath.section][indexPath.item];
+        [model updateReadStatus];
+    };
     
-    SWPSwipeAction *l2 = [[SWPSwipeAction alloc] init];
-    l2.title = @"Forward";
-    l2.backgroundColor = UIColor.greenColor;
-    l2.textColor = [UIColor whiteColor];
-    l2.highlightedTextColor = [UIColor blackColor];
-    l2.image = [[UIImage systemImageNamed:@"arrowshape.turn.up.right.circle"] imageWithTintColor:[UIColor whiteColor] renderingMode:UIImageRenderingModeAlwaysOriginal];
-    l2.highlightedImage = [[UIImage systemImageNamed:@"arrowshape.turn.up.right.circle"] imageWithTintColor:[UIColor blackColor] renderingMode:UIImageRenderingModeAlwaysOriginal];
-    
-    return orientation == SWPSwipeActionsOrientationLeft ? @[l1, l2] : @[r1, r2, r3];
+    return orientation == SWPSwipeActionsOrientationLeft ? @[l1] : @[r1, r2, r3];
 }
 
 - (SWPSwipeOptions *)tableView:(UITableView *)tableView editActionsOptionsForItemAtIndexPath:(nonnull NSIndexPath *)indexPath forOrientation:(SWPSwipeActionsOrientation)orientation
 {
-    return self.viewModel.options;
+    return orientation == SWPSwipeActionsOrientationRight ? self.viewModel.options : self.viewModel.leftOptions;
 }
 
 @end

@@ -87,19 +87,11 @@ typedef NS_ENUM(NSInteger, SWPSwipeVerticalAlignment) {
 /// 按钮图像和按钮标题之间的空间量，以磅为单位。
 /// The amount of space, in points, between the button image and the button title.
 @property (nonatomic, assign) CGFloat buttonSpacing;
-
-/**
- 
- 正在开发中，接下来的某个版本会支持。
- Under development, will be supported in one of the next versions。
  
 /// 扩展样式，当单元格滑过定义的阈值时的行为。
 /// The expansion style. Expansion is the behavior when the cell is swiped past a defined threshold.
 @property (nonatomic, strong) SWPSwipeExpansionStyle *expansionStyle;
  
-
- */
-
 @end
 
 NS_ASSUME_NONNULL_END

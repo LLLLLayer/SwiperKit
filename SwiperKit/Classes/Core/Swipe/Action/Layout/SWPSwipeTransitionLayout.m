@@ -42,7 +42,7 @@
 - (void)continerView:(nonnull UIView *)view didChangeVisibleWidthWithContext:(nonnull SWPActionsViewLayoutContext *)context
 {
     view.bounds = CGRectMake((context.contentSize.width - context.visibleWidth) * context.orientation,
-                             view.bounds.origin.y, view.bounds.size.width, view.bounds.size.width);
+                             view.bounds.origin.y, view.bounds.size.width, view.bounds.size.height);
 }
 
 - (void)layoutView:(nonnull UIView *)view atIndex:(NSInteger)index withContext:(nonnull SWPActionsViewLayoutContext *)context
@@ -67,7 +67,7 @@
 - (void)continerView:(UIView *)view didChangeVisibleWidthWithContext:(SWPActionsViewLayoutContext *)context
 {
     view.bounds = CGRectMake((context.minimumButtonWidth * (CGFloat)context.numberOfActions - context.visibleWidth) * context.orientation,
-                             view.bounds.origin.y, view.bounds.size.width, view.bounds.size.width);
+                             view.bounds.origin.y, view.bounds.size.width, view.bounds.size.height);
 }
 
 - (void)layoutView:(nonnull UIView *)view atIndex:(NSInteger)index withContext:(nonnull SWPActionsViewLayoutContext *)context

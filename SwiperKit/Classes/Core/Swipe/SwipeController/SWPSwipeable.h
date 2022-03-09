@@ -9,6 +9,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@class SWPSwipeAction;
 @class SWPSwipeActionsView;
 
 /// 当前发生滑动的视图状态

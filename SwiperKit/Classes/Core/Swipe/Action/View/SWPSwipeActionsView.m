@@ -15,8 +15,6 @@
 
 @interface SWPSwipeActionsView ()
 
-/// 滑动配置
-@property (nonatomic, strong) SWPSwipeOptions *options;
 /// 将显示的操作
 @property (nonatomic,   copy) NSArray<SWPSwipeAction *> *actions;
 /// 将显示的操作按钮在 Cell 的哪一侧
@@ -35,6 +33,9 @@
 @property (nonatomic, assign) CGFloat visibleWidth;
 /// 按钮最小完整宽度
 @property (nonatomic, assign) CGFloat minimumButtonWidth;
+
+@property (nonatomic, assign) BOOL expanded;
+@property (nonatomic, strong) UIViewPropertyAnimator *expansionAnimator;
 
 @end
 
@@ -99,6 +100,12 @@
     for (NSInteger index = 0; index < self.subviews.count; ++index) {
         [self.transitionLayout layoutView:self.subviews[index] atIndex:index withContext:self.layoutContext];
     }
+    
+    if (self.expanded) {
+        for (UIView *subview in self.subviews) {
+            subview.frame = CGRectMake(self.bounds.origin.x, subview.frame.origin.y, subview.frame.size.width, subview.frame.size.height);
+        }
+    }
 }
 
 #pragma mark - Public Methond
@@ -122,8 +129,7 @@
     [self layoutIfNeeded];
     
     [self __notifyVisibleWidthChanged:preLayoutVisibleWidths
-                            newWidths:[self.transitionLayout
-                                       visibleWidthsForViewsWithContext:self.layoutContext]];
+                            newWidths:[self.transitionLayout visibleWidthsForViewsWithContext:self.layoutContext]];
 }
 
 #pragma mark - Private Methond
@@ -218,9 +224,12 @@
 
 - (CGSize)contentSize
 {
-    return CGSizeMake(self.visibleWidth, self.bounds.size.height);
-//    CGFloat scrollRatio = fmax(0, self.visibleWidth - self.preferredWidth);
-//    return CGSizeMake(self.preferredWidth + (scrollRatio * 0.25), self.bounds.size.height);
+    if (!self.options.expansionStyle.elasticOverscroll || self.visibleWidth < self.preferredWidth) {
+        return CGSizeMake(self.visibleWidth, self.bounds.size.height);
+    } else {
+        CGFloat scrollRatio = fmax(0, self.visibleWidth - self.preferredWidth);
+        return CGSizeMake(self.preferredWidth + (scrollRatio * 0.25), self.bounds.size.height);
+    }
 }
 
 - (CGFloat)maximumImageHeight
@@ -241,6 +250,37 @@
         [self.delegate respondsToSelector:@selector(swipeActionsView:didSelectAction:)]) {
         [self.delegate swipeActionsView:self didSelectAction:self.actions[index]];
     }
+}
+
+#pragma mark - Expanded
+
+-(void)updateExpanded:(BOOL)expanded
+{
+    if (self.expanded == expanded) {
+        return;
+    }
+    self.expanded = expanded;
+    if (self.expansionAnimator.isRunning) {
+        [self.expansionAnimator stopAnimation:YES];
+    }
+    self.expansionAnimator = [[UIViewPropertyAnimator alloc]initWithDuration:0.6 dampingRatio:1.0 animations:^{
+        [self setNeedsLayout];
+        [self layoutIfNeeded];
+    }];
+    [self.expansionAnimator startAnimation];
+}
+
+
+- (SWPSwipeAction *)expandableAction
+{
+    return self.options.expansionStyle ? self.actions.lastObject : nil;
+}
+
+- (UIView *)createDeletionMask
+{
+    UIView *mask = [[UIView alloc] initWithFrame:CGRectMake(fmin(0.0, self.frame.origin.x), 0, self.bounds.size.width * 2, self.bounds.size.height)];
+    mask.backgroundColor = [UIColor whiteColor];
+    return mask;
 }
 
 @end
