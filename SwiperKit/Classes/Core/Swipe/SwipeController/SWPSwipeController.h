@@ -16,25 +16,36 @@ typedef NS_ENUM(NSInteger, SWPSwipeActionsOrientation);
 @class SWPSwipeController;
 @protocol SWPSwipeable;
 
-/// 滑动控制器代理
 @protocol SWPSwipeControllerDelegate <NSObject>
 
 /// 是否可以进行滑动操作
+/// @param controller 滑动控制器
+/// @param orientation 请求此信息的滑动方向
 - (BOOL)swipeController:(SWPSwipeController *)controller canBeginEditingSwipeableForOrientation:(SWPSwipeActionsOrientation)orientation;
 
 /// 滑动操作
+/// @param controller 滑动控制器
+/// @param orientation 请求此信息的滑动方向
 - (NSArray<SWPSwipeAction *> *)swipeController:(SWPSwipeController *)controller editActionsForSwipeableForForOrientation:(SWPSwipeActionsOrientation)orientation;
 
 /// 滑动配置
+/// @param controller 滑动控制器
+/// @param orientation 请求此信息的滑动方向
 - (SWPSwipeOptions *)swipeController:(SWPSwipeController *)controller editActionsOptionsForSwipeableForOrientation:(SWPSwipeActionsOrientation)orientation;
 
 /// 即将滑动回调
+/// @param controller 滑动控制器
+/// @param orientation 请求此信息的滑动方向
 - (void)swipeController:(SWPSwipeController *)controller willBeginEditingSwipeableForOrientation:(SWPSwipeActionsOrientation)orientation;
 
 /// 滑动结束回调
+/// @param controller 滑动控制器
+/// @param orientation 请求此信息的滑动方向
 - (void)swipeController:(SWPSwipeController *)controller didEndEditingSwipeableForOrientation:(SWPSwipeActionsOrientation)orientation;
 
 /// 删除回调
+/// @param controller 滑动控制器
+/// @param indexPath 被删除的位置
 - (void)swipeController:(SWPSwipeController *)controller didDeleteSwipeableAtIndexPath:(NSIndexPath *)indexPath;
 
 @end
@@ -71,6 +82,8 @@ typedef NS_ENUM(NSInteger, SWPSwipeActionsOrientation);
 - (void)setOffset:(CGFloat)offset animated:(BOOL)animated completion:(void(^ _Nullable)(BOOL completed))completion;
 
 - (void)reset;
+
+- (void)traitCollectionDidChangeFrom:(UITraitCollection *)previousTraitCollection to:(UITraitCollection *)currentTraitCollection;
 
 @end
 

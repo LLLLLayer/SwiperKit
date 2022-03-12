@@ -19,6 +19,8 @@
 
 @property (nonatomic,   weak, nullable) UITableView *tableView;
 
+@property (nonatomic, assign) BOOL isPreviouslySelected;
+
 @end
 
 @implementation SWPSwipeTableViewCell
@@ -61,11 +63,43 @@
     while (view.superview) {
         view = view.superview;
         if ([view isKindOfClass:[UITableView class]]) {
-            // 找到自己所属的 collectionView，并添加作为 collectionView 滑动手势的响应者
+            // 找到自己所属的 tableView，并添加作为 tableView 滑动手势的响应者
             self.tableView = (UITableView *)view;
             [self.tableView.panGestureRecognizer removeTarget:self action:nil];
             [self.tableView.panGestureRecognizer addTarget:self action:@selector(__handleTableViewPanGesture:)];
+            return;
         }
+    }
+}
+
+- (void)traitCollectionDidChange:(UITraitCollection *)previousTraitCollection
+{
+    [super traitCollectionDidChange:previousTraitCollection];
+    [self.swipeController traitCollectionDidChangeFrom:previousTraitCollection to:self.traitCollection];
+}
+
+#pragma mark - Reset
+
+- (void)prepareForReuse
+{
+    [super prepareForReuse];
+    [self __reset];
+    [self __resetSelectedState];
+}
+
+- (void)__reset
+{
+    [self.swipeController reset];
+    self.clipsToBounds = NO;
+}
+
+- (void)__resetSelectedState
+{
+    if (self.isPreviouslySelected) {
+        if (!self.scrollView || !self.indexPath) {
+            return;
+        }
+        [self.tableView selectRowAtIndexPath:indexPath animated:NO scrollPosition:UITableViewScrollPositionNone];
     }
 }
 
@@ -78,15 +112,15 @@
     }
     CGPoint poi = [self convertPoint:point toView:self.superview];
     for (SWPSwipeTableViewCell *cell in [self.tableView swipeCells]) {
-        if ((cell.swipeState == SWPSwipeStateLeft || cell.swipeState == SWPSwipeStateRight) && ![cell containsPoint:poi]) {
+        if ((cell.swipeState == SWPSwipeStateLeft || cell.swipeState == SWPSwipeStateRight) && ![cell __containsPoint:poi]) {
             [self.tableView hideSwipeCell];
             return NO;
         }
     }
-    return [self containsPoint:poi];
+    return [self __containsPoint:poi];
 }
 
-- (BOOL)containsPoint:(CGPoint)point
+- (BOOL)__containsPoint:(CGPoint)point
 {
     return point.y > CGRectGetMinY(self.frame) && point.y < CGRectGetMaxY(self.frame);
 }
@@ -142,7 +176,7 @@
 
 - (BOOL)swipeController:(SWPSwipeController *)controller canBeginEditingSwipeableForOrientation:(SWPSwipeActionsOrientation)orientation
 {
-    return YES;
+    return !self.isEditing;
 }
 
 - (NSArray<SWPSwipeAction *> *)swipeController:(SWPSwipeController *)controller editActionsForSwipeableForForOrientation:(SWPSwipeActionsOrientation)orientation
@@ -161,13 +195,16 @@
     if (indexPath && [self.swipeTableViewCelldelegate respondsToSelector:@selector(tableView:editActionsOptionsForItemAtIndexPath:forOrientation:)]) {
         options = [self.swipeTableViewCelldelegate tableView:self.tableView editActionsOptionsForItemAtIndexPath:indexPath forOrientation:orientation];
     }
-    return options ?: [[SWPSwipeOptions alloc] init];
+    return options;
 }
 
 - (void)swipeController:(SWPSwipeController *)controller willBeginEditingSwipeableForOrientation:(SWPSwipeActionsOrientation)orientation
 {
     NSIndexPath *indexPath = self.indexPath;
     [super setHighlighted:NO];
+    self.isPreviouslySelected = self.isSelected;
+    [self.tableView deselectRowAtIndexPath:indexPath animated:NO];
+    
     if (indexPath && [self.swipeTableViewCelldelegate respondsToSelector:@selector(tableView:willBeginEditingItemAtIndexPath:forOrientation:)]) {
         [self.swipeTableViewCelldelegate tableView:self.tableView willBeginEditingItemAtIndexPath:indexPath forOrientation:orientation];
     }
@@ -179,6 +216,7 @@
     if (indexPath && [self.swipeTableViewCelldelegate respondsToSelector:@selector(tableView:didEndEditingItemAtAtIndexPath:forOrientation:)]) {
         [self.swipeTableViewCelldelegate tableView:self.tableView didEndEditingItemAtAtIndexPath:indexPath forOrientation:orientation];
     }
+    [self __resetSelectedState];
 }
 
 - (void)swipeController:(SWPSwipeController *)controller didDeleteSwipeableAtIndexPath:(NSIndexPath *)indexPath

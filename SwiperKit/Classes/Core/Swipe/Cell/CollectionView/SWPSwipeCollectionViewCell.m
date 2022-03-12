@@ -20,6 +20,8 @@
 
 @property (nonatomic,   weak, nullable) UICollectionView *collectionView;
 
+@property (nonatomic, assign) BOOL isPreviouslySelected;
+
 @end
 
 @implementation SWPSwipeCollectionViewCell
@@ -75,7 +77,47 @@
             self.collectionView = (UICollectionView *)view;
             [self.collectionView.panGestureRecognizer removeTarget:self action:nil];
             [self.collectionView.panGestureRecognizer addTarget:self action:@selector(__handleCollectionPanGesture:)];
+            return;
         }
+    }
+}
+
+- (void)willMoveToWindow:(UIWindow *)newWindow
+{
+    [super willMoveToWindow:newWindow];
+    if (newWindow) {
+        [self __reset];
+    }
+}
+
+- (void)traitCollectionDidChange:(UITraitCollection *)previousTraitCollection
+{
+    [super traitCollectionDidChange:previousTraitCollection];
+    [self.swipeController traitCollectionDidChangeFrom:previousTraitCollection to:self.traitCollection];
+}
+
+#pragma mark - Reset
+
+- (void)prepareForReuse
+{
+    [super prepareForReuse];
+    [self __reset];
+    [self __resetSelectedState];
+}
+
+- (void)__reset
+{
+    [self.swipeController reset];
+    self.clipsToBounds = NO;
+}
+
+- (void)__resetSelectedState
+{
+    if (self.isPreviouslySelected) {
+        if (!self.scrollView || !self.indexPath) {
+            return;
+        }
+        [self.collectionView selectItemAtIndexPath:self.indexPath animated:NO scrollPosition:UICollectionViewScrollPositionNone];
     }
 }
 
@@ -98,15 +140,15 @@
     }
     CGPoint poi = [self convertPoint:point toView:self.superview];
     for (SWPSwipeCollectionViewCell *cell in [self.collectionView swipeCells]) {
-        if ((cell.swipeState == SWPSwipeStateLeft || cell.swipeState == SWPSwipeStateRight) && ![cell containsPoint:poi]) {
+        if ((cell.swipeState == SWPSwipeStateLeft || cell.swipeState == SWPSwipeStateRight) && ![cell __containsPoint:poi]) {
             [self.collectionView hideSwipeCell];
             return NO;
         }
     }
-    return [self containsPoint:poi];
+    return [self __containsPoint:poi];
 }
 
-- (BOOL)containsPoint:(CGPoint)point
+- (BOOL)__containsPoint:(CGPoint)point
 {
     return CGRectContainsPoint(self.frame, point);
 }
@@ -158,14 +200,6 @@
     }
 }
 
-#pragma mark - Reset
-
-- (void)__reset
-{
-    self.contentView.clipsToBounds = NO;
-    [self.swipeController reset];
-}
-
 #pragma mark - SWPSwipeControllerDelegate
 
 - (BOOL)swipeController:(SWPSwipeController *)controller canBeginEditingSwipeableForOrientation:(SWPSwipeActionsOrientation)orientation
@@ -189,13 +223,17 @@
     if (indexPath && [self.swipeCollectionViewCelldelegate respondsToSelector:@selector(collectionView:editActionsOptionsForItemAtIndexPath:forOrientation:)]) {
         options = [self.swipeCollectionViewCelldelegate collectionView:self.collectionView editActionsOptionsForItemAtIndexPath:indexPath forOrientation:orientation];
     }
-    return options ?: [[SWPSwipeOptions alloc] init];
+    return options;
 }
 
 - (void)swipeController:(SWPSwipeController *)controller willBeginEditingSwipeableForOrientation:(SWPSwipeActionsOrientation)orientation
 {
     NSIndexPath *indexPath = self.indexPath;
+    
     [super setHighlighted:NO];
+    self.isPreviouslySelected = self.isSelected;
+    [self.collectionView deselectItemAtIndexPath:indexPath animated:NO];
+    
     if (indexPath && [self.swipeCollectionViewCelldelegate respondsToSelector:@selector(collectionView:willBeginEditingItemAtIndexPath:forOrientation:)]) {
         [self.swipeCollectionViewCelldelegate collectionView:self.collectionView willBeginEditingItemAtIndexPath:indexPath forOrientation:orientation];
     }
@@ -207,6 +245,7 @@
     if (indexPath && [self.swipeCollectionViewCelldelegate respondsToSelector:@selector(collectionView:didEndEditingItemAtAtIndexPath:forOrientation:)]) {
         [self.swipeCollectionViewCelldelegate collectionView:self.collectionView didEndEditingItemAtAtIndexPath:indexPath forOrientation:orientation];
     }
+    [self __resetSelectedState];
 }
 
 - (void)swipeController:(SWPSwipeController *)controller didDeleteSwipeableAtIndexPath:(NSIndexPath *)indexPath

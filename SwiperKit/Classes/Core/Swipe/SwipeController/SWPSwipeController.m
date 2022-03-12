@@ -40,8 +40,6 @@
 
 @implementation SWPSwipeController
 
-#pragma mark - Public Methond
-
 /// 生成实例
 /// @param swipeable 发生滑动的视图
 /// @param actionsContainerView 操作视图的容器视图
@@ -59,14 +57,33 @@
     return self;
 }
 
+- (void)traitCollectionDidChangeFrom:(UITraitCollection *)previousTraitCollection to:(UITraitCollection *)currentTraitCollection
+{
+    UIView<SWPSwipeable> *swipeable = self.swipeable;
+    UIView *actionsContainerView = self.swipeActionsContainerView;
+    if (!swipeable || !actionsContainerView) {
+        return;
+    }
+    CGFloat targetOffset = [self __targetCenterWithActive:swipeable.swipeState != SWPSwipeStateCenter];
+    actionsContainerView.center = CGPointMake(targetOffset, actionsContainerView.center.y);
+    [swipeable.swipeActionsView updateVisibleWidth:fabs(CGRectGetMinX(actionsContainerView.frame))];
+    [swipeable layoutIfNeeded];
+}
+
 #pragma mark - Action
 
 /// 滑动手势处理
 /// @param gesture 滑动手势
 - (void)handlePanGesture:(UIPanGestureRecognizer *)gesture
 {
+    UIView *target = self.swipeActionsContainerView;
+    UIView<SWPSwipeable> *swipeable = self.swipeable;
+    if (!target || !swipeable) {
+        return;
+    }
+    
     // 位移速度
-    CGPoint velocity = [gesture velocityInView:self.swipeable];
+    CGPoint velocity = [gesture velocityInView:target];
     
     // 是否允许滑动
     if (![self.delegate respondsToSelector:@selector(swipeController:canBeginEditingSwipeableForOrientation:)] ||
@@ -78,7 +95,7 @@
     switch (gesture.state) {
         case UIGestureRecognizerStateBegan:
         {
-            // 存在拖动的则阻断
+            // 若已经存在拖动的 Cell，则阻断此次拖动
             for (id<SWPSwipeable> swipeable in self.swipeable.scrollView.swipeables) {
                 if (swipeable.swipeState == SWPSwipeStateDragging) {
                     return;
@@ -89,117 +106,129 @@
             [self __stopAnimatorIfNeeded];
             
             // 保存当前操作视图的容器视图 center.x
-            self.originalCenter = self.swipeActionsContainerView.center.x;
+            self.originalCenter = target.center.x;
             
             // 如果当前处于中心或以动画形式到中心，则可以添加操作视图
             if (self.swipeable.swipeState == SWPSwipeStateCenter || self.swipeable.swipeState == SWPSwipeStateAnimatingToCenter) {
                 SWPSwipeActionsOrientation targetOrientation = velocity.x > 0 ? SWPSwipeActionsOrientationLeft : SWPSwipeActionsOrientationRight;
                 [self __showActionsViewForOrientation:targetOrientation];
             }
+            
             break;
         }
         case UIGestureRecognizerStateChanged:
         {
-            // 此时逻辑上 swipeState 已经在手势开始时进行了更新，若未处理完手势开始逻辑，则进行阻断
-            if (self.swipeable.swipeState == SWPSwipeStateCenter) {
+            SWPSwipeActionsView *actionsView = swipeable.swipeActionsView;
+            if (!actionsView) {
                 return;
             }
             
-            if (self.swipeable.swipeState == SWPSwipeStateAnimatingToCenter) {
-                for (id<SWPSwipeable> swipeable in self.swipeable.scrollView.swipeables) {
-                    if (swipeable.swipeState == SWPSwipeStateLeft ||
-                        swipeable.swipeState == SWPSwipeStateRight ||
-                        swipeable.swipeState == SWPSwipeStateDragging) {
-                        return;
+            // 此时逻辑上 swipeState 已经在手势开始时进行了更新，若未处理完手势开始逻辑，则进行阻断
+            if (swipeable.swipeState == SWPSwipeStateCenter) {
+                return;
+            }
+            
+            // 阻断出现多个滑动视图
+            if (swipeable.swipeState == SWPSwipeStateAnimatingToCenter) {
+                for (id<SWPSwipeable> swipedCell in swipeable.scrollView.swipeables) {
+                    if (swipedCell.swipeState == SWPSwipeStateLeft ||
+                        swipedCell.swipeState == SWPSwipeStateRight ||
+                        swipedCell.swipeState == SWPSwipeStateDragging) {
+                        if (swipedCell != swipeable) {
+                            return;
+                        }
                     }
                 }
             }
             
             // 位移
-            CGPoint translation = [gesture translationInView:self.swipeActionsContainerView];
+            CGFloat translation = [gesture translationInView:target].x;
             
             // 滑动比率 1.0，动画跟手
             self.scrollRatio = 1.0;
             
             // 如果用户在滑出一侧的操作视图后，直接进行反方向的滑动，则不展示另一侧的操作视图，同时修改滑动阻尼
-            if ((translation.x + self.originalCenter - CGRectGetMidX(self.swipeable.bounds)) * self.swipeable.swipeActionsView.orientation > 0) {
-                self.swipeActionsContainerView.center = CGPointMake([gesture elasticTranslationInView:self.swipeActionsContainerView
-                                                                                            withLimit:CGSizeZero
-                                                                                   fromOriginalCenter:CGPointMake(self.originalCenter, 0)
-                                                                                        applyingRatio:gesture.defaultElasticTranslationRatio].x,
-                                                                    self.swipeActionsContainerView.center.y);
+            if ((translation + self.originalCenter - CGRectGetMidX(self.swipeable.bounds)) * actionsView.orientation > 0) {
+                target.center = CGPointMake([gesture elasticTranslationInView:self.swipeActionsContainerView
+                                                                    withLimit:CGSizeZero
+                                                           fromOriginalCenter:CGPointMake(self.originalCenter, 0)
+                                                                applyingRatio:gesture.defaultElasticTranslationRatio].x, target.center.y);
                 self.scrollRatio = self.elasticScrollRatio;
                 return;
             }
             
-            SWPSwipeExpansionStyle *expansionStyle = self.swipeable.swipeActionsView.options.expansionStyle;
+            // 需要做扩展
+            SWPSwipeExpansionStyle *expansionStyle = swipeable.swipeActionsView.options.expansionStyle;
             if (expansionStyle && expansionStyle.type != SWPSwipeExpansionStyleTypedestructiveSecondConfirmation) {
                 // 如果是 CollectionView 的话，referenceFrame 就是 ContentView 的 Frame
-                CGRect referenceFrame = self.swipeActionsContainerView != self.swipeable ? self.swipeActionsContainerView.frame : CGRectNull;
-                BOOL expanded = [expansionStyle shouldExpandWithSwipeable:self.swipeable gesture:gesture inSuperview:self.swipeable.scrollView withinFrame:referenceFrame];
-                CGFloat targetOffset = [expansionStyle targetOffsetForView:self.swipeable];
-                CGFloat currentOffset = fabs(translation.x + self.originalCenter - CGRectGetMidX(self.swipeable.bounds));
+                CGRect referenceFrame = target != swipeable ? target.frame : CGRectNull;
+                BOOL expanded = [expansionStyle shouldExpandWithSwipeable:swipeable gesture:gesture inSuperview:swipeable.scrollView withinFrame:referenceFrame];
+                CGFloat targetOffset = [expansionStyle targetOffsetForView:swipeable];
+                CGFloat currentOffset = fabs(translation + self.originalCenter - CGRectGetMidX(swipeable.bounds));
                 
-                if (expanded && !self.swipeable.swipeActionsView.expanded && targetOffset > currentOffset) {
+                // 扩展触发
+                if (expanded && !actionsView.expanded && targetOffset > currentOffset) {
                     CGFloat centerForTranslationToEdge = CGRectGetMidX(self.swipeable.bounds) - targetOffset * self.swipeable.swipeActionsView.orientation;
                     CGFloat delta = centerForTranslationToEdge - self.originalCenter;
                     [self __animateToOffset:centerForTranslationToEdge withInitialVelocity:0 completion:nil];
                     [gesture setTranslation:CGPointMake(delta, 0) inView:self.swipeable.superview];
                 } else {
-                    self.swipeActionsContainerView.center = CGPointMake([gesture elasticTranslationInView:self.swipeActionsContainerView
-                                                                                                withLimit:CGSizeMake(targetOffset, 0.0)
-                                                                                       fromOriginalCenter:CGPointMake(self.originalCenter, 0.0)
-                                                                                            applyingRatio:expansionStyle.targetOverscrollElasticity].x,
-                                                                        self.swipeActionsContainerView.center.y);
-                    [self.swipeable.swipeActionsView updateVisibleWidth:fabs(CGRectGetMinX(self.swipeActionsContainerView.frame))];
+                    target.center = CGPointMake([gesture elasticTranslationInView:target
+                                                                        withLimit:CGSizeMake(targetOffset, 0.0)
+                                                               fromOriginalCenter:CGPointMake(self.originalCenter, 0.0)
+                                                                    applyingRatio:expansionStyle.targetOverscrollElasticity].x, target.center.y);
+                    [actionsView updateVisibleWidth:fabs(CGRectGetMinX(target.frame))];
                 }
                 
-                [self.swipeable.swipeActionsView updateExpanded:expanded];
+                [actionsView updateExpanded:expanded];
             } else {
-                self.swipeActionsContainerView.center = CGPointMake([gesture elasticTranslationInView:self.swipeActionsContainerView
-                                                                                            withLimit:CGSizeMake(self.swipeable.swipeActionsView.preferredWidth, 0.0)
-                                                                                   fromOriginalCenter:CGPointMake(self.originalCenter, 0.0)
-                                                                                        applyingRatio:gesture.defaultElasticTranslationRatio].x,
-                                                                    self.swipeActionsContainerView.center.y);
-                [self.swipeable.swipeActionsView updateVisibleWidth:fabs(CGRectGetMinX(self.swipeActionsContainerView.frame))];
-                if ((self.swipeActionsContainerView.center.x - self.originalCenter) / translation.x != 1.0) {
+                target.center = CGPointMake([gesture elasticTranslationInView:target
+                                                                    withLimit:CGSizeMake(actionsView.preferredWidth, 0.0)
+                                                           fromOriginalCenter:CGPointMake(self.originalCenter, 0.0)
+                                                                applyingRatio:gesture.defaultElasticTranslationRatio].x, target.center.y);
+                [actionsView updateVisibleWidth:fabs(CGRectGetMinX(self.swipeActionsContainerView.frame))];
+                if ((target.center.x - self.originalCenter) / translation != 1.0) {
                     self.scrollRatio = self.elasticScrollRatio;
                 }
             }
-                
+            
             break;
         }
         case UIGestureRecognizerStateEnded:
         case UIGestureRecognizerStateCancelled:
         case UIGestureRecognizerStateFailed:
         {
+            SWPSwipeActionsView *actionsView = swipeable.swipeActionsView;
+            if (!actionsView) {
+                return;
+            }
+            
             // 已经在中心了
-            if (self.swipeable.swipeState == SWPSwipeStateCenter &&
-                CGRectGetMidX(self.swipeable.bounds) == self.swipeActionsContainerView.center.x)  {
+            if (swipeable.swipeState == SWPSwipeStateCenter &&
+                CGRectGetMidX(swipeable.bounds) == target.center.x)  {
                 return;
             }
             
             // 更新 swipeState
-            self.swipeable.swipeState = [self __targetStateForVelocity:velocity];
+            swipeable.swipeState = [self __targetStateForVelocity:velocity];
             
             // 达到滑动目标
-            if (self.swipeable.swipeActionsView.expanded && [self.swipeable.swipeActionsView expandableAction]) {
-                [self performWithAction:[self.swipeable.swipeActionsView expandableAction]];
+            if (actionsView.expanded && [actionsView expandableAction]) {
+                [self performWithAction:[actionsView expandableAction]];
             } else {
-                
-                CGFloat targetOffset = [self __targetCenterWithActive:self.swipeable.swipeState != SWPSwipeStateCenter];
+                CGFloat targetOffset = [self __targetCenterWithActive:swipeable.swipeState != SWPSwipeStateCenter];
                 CGFloat distance = targetOffset - self.swipeActionsContainerView.center.x;
                 CGFloat normalizedVelocity = velocity.x * self.scrollRatio / distance;
                 [self  __animateToOffset:targetOffset withInitialVelocity:normalizedVelocity completion:^(BOOL complete) {
-                    if (self.swipeable.swipeState == SWPSwipeStateCenter) {
+                    if (swipeable.swipeState == SWPSwipeStateCenter) {
                         [self reset];
                     }
                 }];
                 
                 /// 操作视图消失回调
-                if (self.swipeable.swipeState == SWPSwipeStateCenter) {
+                if (swipeable.swipeState == SWPSwipeStateCenter) {
                     if ([self.delegate respondsToSelector:@selector(swipeController:didEndEditingSwipeableForOrientation:)]) {
-                        [self.delegate swipeController:self didEndEditingSwipeableForOrientation:self.swipeable.swipeActionsView.orientation];
+                        [self.delegate swipeController:self didEndEditingSwipeableForOrientation:actionsView.orientation];
                     }
                 }
             }
@@ -228,7 +257,7 @@
         return NO;
     }
     NSArray *actions = [self.delegate swipeController:self editActionsForSwipeableForForOrientation:orientation];
-    if (actions.count == 0) {
+    if (!actions || actions.count == 0) {
         return NO;
     }
     
@@ -249,6 +278,12 @@
 - (void)__configureActionsViewWithActions:(NSArray<SWPSwipeAction *> *)actions
                            forOrientation:(SWPSwipeActionsOrientation)orientation
 {
+    UIView<SWPSwipeable> *swipeable = self.swipeable;
+    UIView *actionsContainerView = self.swipeActionsContainerView;
+    if (!swipeable || !actionsContainerView) {
+        return;
+    }
+    
     // 滑动时配置
     SWPSwipeOptions *options;
     if ([self.delegate respondsToSelector:@selector(swipeController:editActionsOptionsForSwipeableForOrientation:)]) {
@@ -261,35 +296,34 @@
     }
     
     // 移除可能存在的操作视图
-     [self.swipeable.swipeActionsView removeFromSuperview];
-     self.swipeable.swipeActionsView = nil;
+     [swipeable.swipeActionsView removeFromSuperview];
+    swipeable.swipeActionsView = nil;
     
     // 新操作视图
     SWPSwipeActionsView *actionsView = [[SWPSwipeActionsView alloc] initWithOptions:options
                                                                             actions:actions
                                                                         orientation:orientation
-                                                                            maxSize:self.swipeable.bounds.size];
+                                                                            maxSize:swipeable.bounds.size];
     actionsView.delegate = self;
     
     // 操作视图布局
-    [self.swipeActionsContainerView addSubview:actionsView];
+    [actionsContainerView addSubview:actionsView];
     [NSLayoutConstraint activateConstraints:@[
-        [actionsView.heightAnchor constraintEqualToAnchor:self.swipeable.heightAnchor],
-        [actionsView.widthAnchor constraintEqualToAnchor:self.swipeable.widthAnchor multiplier:2.0],
-        [actionsView.topAnchor constraintEqualToAnchor:self.swipeable.topAnchor]
+        [actionsView.heightAnchor constraintEqualToAnchor:swipeable.heightAnchor],
+        [actionsView.widthAnchor constraintEqualToAnchor:swipeable.widthAnchor multiplier:2.0],
+        [actionsView.topAnchor constraintEqualToAnchor:swipeable.topAnchor]
     ]];
     if (orientation == SWPSwipeActionsOrientationLeft) {
-        [[actionsView.rightAnchor constraintEqualToAnchor:self.swipeActionsContainerView.leftAnchor] setActive:YES];
+        [[actionsView.rightAnchor constraintEqualToAnchor:actionsContainerView.leftAnchor] setActive:YES];
     } else {
-        [[actionsView.leftAnchor constraintEqualToAnchor:self.swipeActionsContainerView.rightAnchor] setActive:YES];
+        [[actionsView.leftAnchor constraintEqualToAnchor:actionsContainerView.rightAnchor] setActive:YES];
     }
     [actionsView setNeedsUpdateConstraints];
     
     // 更新状态
-    self.swipeable.swipeActionsView = actionsView;
-    self.swipeable.swipeState = SWPSwipeStateDragging;
+    swipeable.swipeActionsView = actionsView;
+    swipeable.swipeState = SWPSwipeStateDragging;
 }
-
 
 /// 发生滑动的视图的目标状态
 /// @param velocity 滑动速度
@@ -391,20 +425,6 @@
     }
 }
 
-- (void)reset
-{
-    self.swipeable.swipeState = SWPSwipeStateCenter;
-    [self.swipeable.swipeActionsView removeFromSuperview];
-    self.swipeable.swipeActionsView = nil;
-}
-
-- (void)resetSwipable
-{
-    CGFloat targetPoint = [self __targetCenterWithActive:NO];
-    self.swipeActionsContainerView.center = CGPointMake(targetPoint, self.swipeActionsContainerView.center.y);
-    [self.swipeable.swipeActionsView updateVisibleWidth:self.swipeActionsContainerView.frame.origin.x];
-}
-
 #pragma mark - Getter
 
 /// 滑动手势
@@ -453,7 +473,7 @@
     return YES;
 }
 
-#pragma mark - SWPSwipeActionsViewDelegate
+#pragma mark - SWPSwipeActionsViewDelegate & Perform
 
 /// 操作视图被点击
 /// @param swipeActionsView 操作视图
@@ -539,7 +559,7 @@
                 } completion:^(BOOL finished) {
                     swipeActionsContainerView.maskView = nil;
                     [strongSelf reset];
-                    [strongSelf resetSwipable];
+                    [strongSelf resetSwipe];
                 }];
                 break;
             }
@@ -573,8 +593,7 @@
     }
 }
 
-
-#pragma mark - PublicMethond
+#pragma mark - Public Methond
 
 - (void)hideSwipeWithAnimated:(BOOL)animated complation:(void(^ _Nullable)(BOOL complete))complation
 {
@@ -637,6 +656,19 @@
     }
 }
 
+- (void)reset
+{
+    self.swipeable.swipeState = SWPSwipeStateCenter;
+    [self.swipeable.swipeActionsView removeFromSuperview];
+    self.swipeable.swipeActionsView = nil;
+}
+
+- (void)resetSwipe
+{
+    CGFloat targetPoint = [self __targetCenterWithActive:NO];
+    self.swipeActionsContainerView.center = CGPointMake(targetPoint, self.swipeActionsContainerView.center.y);
+    [self.swipeable.swipeActionsView updateVisibleWidth:self.swipeActionsContainerView.frame.origin.x];
+}
 
 @end
 

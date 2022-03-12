@@ -172,18 +172,10 @@
                                                                                                  contentWidth:self.minimumButtonWidth];
         wrapperView.translatesAutoresizingMaskIntoConstraints = NO;
         [wrapperView addSubview:button];
-        if (action.backgroundEffect) {
-            UIVisualEffectView *effectView = [[UIVisualEffectView alloc] initWithEffect:action.backgroundEffect];
-            effectView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-            [effectView.contentView addSubview:wrapperView];
-            [self addSubview:effectView];
-        } else {
-            [self addSubview:wrapperView];
-        }
+        [self addSubview:wrapperView];
         
         button.frame = wrapperView.contentRect;
         button.maximumImageHeight = [self maximumImageHeight];
-        button.verticalAlignment = self.options.buttonVerticalAlignment;
         button.shouldHighlight = !!self.options.backgroundColor;
         
         [[wrapperView.leftAnchor constraintEqualToAnchor:self.leftAnchor] setActive:YES];

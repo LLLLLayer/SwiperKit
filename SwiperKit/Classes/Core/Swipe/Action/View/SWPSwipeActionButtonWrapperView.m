@@ -49,7 +49,7 @@
 
 - (void)__configureBackgroundColorWithAction:(SWPSwipeAction *)action
 {
-    if (action.backgroundColor == [UIColor clearColor] && !action.backgroundEffect) {
+    if (action.backgroundColor == [UIColor clearColor]) {
         [self setOpaque:YES];
         return;
     }

@@ -9,8 +9,6 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-typedef NS_ENUM(NSInteger, SWPSwipeVerticalAlignment);
-
 @class SWPSwipeOptions;
 @class SWPSwipeAction;
 
@@ -19,8 +17,6 @@ typedef NS_ENUM(NSInteger, SWPSwipeVerticalAlignment);
 @property (nonatomic, assign) CGFloat spacing;
 
 @property (nonatomic, assign) CGFloat maximumImageHeight;
-
-@property (nonatomic, assign) SWPSwipeVerticalAlignment verticalAlignment;
 
 @property (nonatomic, assign) BOOL shouldHighlight;
 

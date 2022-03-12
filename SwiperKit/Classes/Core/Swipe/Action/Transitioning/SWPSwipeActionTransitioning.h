@@ -11,6 +11,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class SWPSwipeActionTransitioningContext;
 
+// 采用“SwipeActionTransitioning”协议，实现在过渡期间实现自定义动作外观的对象
 @protocol SWPSwipeActionTransitioning <NSObject>
 
 - (void)didTransitionWithContext:(SWPSwipeActionTransitioningContext *)context;
