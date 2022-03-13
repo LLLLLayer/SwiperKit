@@ -74,7 +74,7 @@
 
 /// 滑动手势处理
 /// @param gesture 滑动手势
-- (void)handlePanGesture:(UIPanGestureRecognizer *)gesture
+- (void)__handlePanGesture:(UIPanGestureRecognizer *)gesture
 {
     UIView *target = self.swipeActionsContainerView;
     UIView<SWPSwipeable> *swipeable = self.swipeable;
@@ -241,7 +241,7 @@
 
 /// 点击手势处理
 /// @param gesture 点击手势
-- (void)handleTapGesture:(UITapGestureRecognizer *)gesture
+- (void)__handleTapGesture:(UITapGestureRecognizer *)gesture
 {
     [self hideSwipeWithAnimated:YES complation:nil];
 }
@@ -431,7 +431,7 @@
 - (UIPanGestureRecognizer *)panGestureRecognizer
 {
     if (!_panGestureRecognizer) {
-        _panGestureRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePanGesture:)];
+        _panGestureRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(__handlePanGesture:)];
         _panGestureRecognizer.delegate = self;
     }
     return _panGestureRecognizer;
@@ -441,7 +441,7 @@
 - (UITapGestureRecognizer *)tapGestureRecognizer
 {
     if (!_tapGestureRecognizer) {
-        _tapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTapGesture:)];
+        _tapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(__handleTapGesture:)];
         _tapGestureRecognizer.delegate = self;
     }
     return _tapGestureRecognizer;

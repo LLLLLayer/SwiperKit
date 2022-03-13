@@ -36,8 +36,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) CGFloat initialScale;
 @property (nonatomic, assign) CGFloat threshold;
 
-
-
 @end
 
 NS_ASSUME_NONNULL_END
